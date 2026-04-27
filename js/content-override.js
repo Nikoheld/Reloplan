@@ -548,10 +548,18 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', async function () {
+        var applied = false;
+        try {
+            var response = await fetch('/api/content', { cache: 'no-store' });
+            if (response.ok) {
+                applyContent(await response.json());
+                applied = true;
+            }
+        } catch (e) { /* static fallback */ }
         try {
             var stored = localStorage.getItem(KEY);
-            if (stored) applyContent(JSON.parse(stored));
+            if (!applied && stored) applyContent(JSON.parse(stored));
         } catch (e) { /* ignore invalid local content */ }
         document.body.classList.add('rp-ready');
     });
