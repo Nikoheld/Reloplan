@@ -548,13 +548,21 @@
         }
     }
 
+    function hasRenderableContent(content) {
+        if (!content || !content.structure || !content.structure.length) return false;
+        return content._cmsSaved === true;
+    }
+
     document.addEventListener('DOMContentLoaded', async function () {
         var applied = false;
         try {
-            var response = await fetch('/api/content', { cache: 'no-store' });
-            if (response.ok) {
-                applyContent(await response.json());
-                applied = true;
+            var resp = await fetch('/api/content', { cache: 'no-store', credentials: 'same-origin' });
+            if (resp.ok) {
+                var remote = await resp.json();
+                if (hasRenderableContent(remote)) {
+                    applyContent(remote);
+                    applied = true;
+                }
             }
         } catch (e) { /* static fallback */ }
         try {

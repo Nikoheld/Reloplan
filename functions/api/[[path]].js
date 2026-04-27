@@ -91,7 +91,8 @@ async function readJson(request) {
 
 async function handle(request, env, params) {
   const kv = getKV(env);
-  const path = `/${(params.path || []).join('/')}`;
+  const rawPath = params.path || [];
+  const path = `/${Array.isArray(rawPath) ? rawPath.join('/') : rawPath}`;
   const method = request.method.toUpperCase();
 
   if (path === '/content' && method === 'GET') {
@@ -103,6 +104,7 @@ async function handle(request, env, params) {
     if (!kv) return json({ error: 'KV binding RELOPLAN_KV fehlt' }, 500);
     if (!await verifySession(request, env)) return json({ error: 'Nicht angemeldet' }, 401);
     const content = await readJson(request);
+    content._cmsSaved = true;
     await kv.put(CONTENT_KEY, JSON.stringify(content));
     return json({ success: true });
   }
@@ -113,14 +115,16 @@ async function handle(request, env, params) {
   }
 
   if (path === '/auth/setup' && method === 'POST') {
-    if (!kv) return json({ error: 'KV binding RELOPLAN_KV fehlt' }, 500);
+    if (!kv || !env.SESSION_SECRET) return json({ error: 'RELOPLAN_KV oder SESSION_SECRET fehlt' }, 500);
     if (await kv.get(AUTH_KEY)) return json({ error: 'Bereits eingerichtet' }, 400);
     const body = await readJson(request);
     if (!body.password || body.password.length < 12) return json({ error: 'Passwort zu kurz' }, 400);
     const salt = randomHex(16);
     await kv.put(AUTH_KEY, JSON.stringify({ salt, iterations: KDF_ITER, hash: await hashPassword(body.password, salt) }));
-    await kv.put(CONTENT_KEY, JSON.stringify(DEFAULT_CONTENT));
-    const session = await signSession({ exp: Date.now() + SESSION_TTL_SECONDS * 1000 }, env.SESSION_SECRET || randomHex(32));
+    const initialContent = body.content && typeof body.content === 'object' ? body.content : DEFAULT_CONTENT;
+    initialContent._cmsSaved = true;
+    await kv.put(CONTENT_KEY, JSON.stringify(initialContent));
+    const session = await signSession({ exp: Date.now() + SESSION_TTL_SECONDS * 1000 }, env.SESSION_SECRET);
     return json({ success: true }, 200, { 'set-cookie': `rp_sid=${encodeURIComponent(session)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${SESSION_TTL_SECONDS}` });
   }
 

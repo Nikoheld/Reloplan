@@ -871,6 +871,18 @@ const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_LOCK_MS = 900000; // 15 min
 const IMPORT_MAX_BYTES = 750000;
 const MODULE_TYPES = ['hero','about','process','whoweare','team','testimonials','faq','cta','features','areas','checklist','gallery','packages','contact'];
+var API_AUTH = false;
+
+async function apiJSON(url, options){
+  var resp = await fetch(url, Object.assign({
+    credentials:'same-origin',
+    headers:{'content-type':'application/json'}
+  }, options || {}));
+  var data = null;
+  try { data = await resp.json(); } catch(e) {}
+  if(!resp.ok) throw new Error((data && data.error) || ('HTTP '+resp.status));
+  return data || {};
+}
 
 /* ---- Helpers ---- */
 function $i(id){ return document.getElementById(id); }
@@ -884,7 +896,7 @@ function toast(msg, ok=true){
   setTimeout(()=>{d.style.cssText='opacity:0;transition:opacity .3s';setTimeout(()=>d.remove(),300);},3000);
 }
 
-/* === AUTH (PBKDF2, localStorage, no server) === */
+/* === AUTH (Cloudflare Pages API) === */
 const Auth = {
   async _hash(pwd, salt, iter){
     const e=new TextEncoder(), k=await crypto.subtle.importKey('raw',e.encode(pwd),'PBKDF2',false,['deriveBits']);
@@ -907,18 +919,14 @@ const Auth = {
       localStorage.removeItem(K.att);
     }
   },
+  async status(){
+    try { return await apiJSON('/api/auth/status', {method:'GET'}); }
+    catch(e) { return {isSetup:!!localStorage.getItem(K.hash),isAuthenticated:false,offline:true}; }
+  },
   configured(){ return !!localStorage.getItem(K.hash); },
-  startSession(){
-    localStorage.setItem(K.tok, this._rand());
-    localStorage.setItem(K.exp, String(Date.now()+SESSION_MS));
-  },
-  sessionOk(){
-    if(!localStorage.getItem(K.tok)) return false;
-    const exp=+localStorage.getItem(K.exp)||0;
-    if(Date.now()>exp){ localStorage.removeItem(K.tok); localStorage.removeItem(K.exp); return false; }
-    return true;
-  },
-  endSession(){ localStorage.removeItem(K.tok); localStorage.removeItem(K.exp); },
+  startSession(){ localStorage.setItem(K.exp, String(Date.now()+SESSION_MS)); },
+  sessionOk(){ return API_AUTH; },
+  endSession(){ API_AUTH=false; localStorage.removeItem(K.exp); },
   showLogin(){ $i('setupForm').style.display=$i('resetForm').style.display='none'; $i('loginForm').style.display=''; $i('loginError').style.display='none'; $i('loginPwd').value=''; setTimeout(function(){ $i('loginPwd').focus(); },50); },
   showSetup(){ $i('loginForm').style.display=$i('resetForm').style.display='none'; $i('setupForm').style.display=''; setTimeout(function(){ $i('setupPwd').focus(); },50); },
   showReset(){ $i('loginForm').style.display=$i('setupForm').style.display='none'; $i('resetForm').style.display=''; },
@@ -930,9 +938,11 @@ const Auth = {
     if(p!==p2){ e.textContent='Passwörter stimmen nicht überein.'; e.style.display=''; return; }
     var btn=$i('setupBtn'); btn.disabled=true; btn.textContent='Wird gespeichert…';
     try{
-      var salt=this._rand(16), hash=await this._hash(p,salt,KDF_ITER);
-      localStorage.setItem(K.salt,salt); localStorage.setItem(K.hash,hash); localStorage.setItem(K.iter,String(KDF_ITER));
-      this.startSession(); App.enter();
+      await apiJSON('/api/auth/setup',{method:'POST',body:JSON.stringify({password:p,content:Cnt.get()})});
+      API_AUTH=true;
+      this.startSession();
+      await Cnt.load();
+      App.enter();
     }catch(err){ e.textContent='Fehler: '+err.message; e.style.display=''; btn.disabled=false; btn.textContent='Passwort festlegen'; }
   },
   async login(){
@@ -943,23 +953,16 @@ const Auth = {
     if(!p){ e.textContent='Bitte Passwort eingeben.'; e.style.display=''; return; }
     var btn=$i('loginBtn'); btn.disabled=true; btn.textContent='Wird geprüft…';
     try{
-      var iter=+localStorage.getItem(K.iter)||100000;
-      var h=await this._hash(p, localStorage.getItem(K.salt), iter);
-      if(h===localStorage.getItem(K.hash)){
-        if(iter!==KDF_ITER){
-          var salt=this._rand(16), hash=await this._hash(p,salt,KDF_ITER);
-          localStorage.setItem(K.salt,salt); localStorage.setItem(K.hash,hash); localStorage.setItem(K.iter,String(KDF_ITER));
-        }
-        this.clearAttempts(); this.startSession(); App.enter();
-      } else {
-        this.recordFailedAttempt();
-        e.textContent='Falsches Passwort.'; e.style.display='';
-        btn.disabled=false; btn.textContent='Anmelden'; $i('loginPwd').value=''; $i('loginPwd').focus();
-      }
+      await apiJSON('/api/auth/login',{method:'POST',body:JSON.stringify({password:p})});
+      API_AUTH=true;
+      this.clearAttempts(); this.startSession();
+      await Cnt.load();
+      App.enter();
+      btn.disabled=false; btn.textContent='Anmelden';
     }catch(err){ e.textContent='Fehler: '+err.message; e.style.display=''; btn.disabled=false; btn.textContent='Anmelden'; }
   },
-  logout(){ this.endSession(); App.init(); },
-  doReset(){ localStorage.removeItem(K.hash); localStorage.removeItem(K.salt); localStorage.removeItem(K.iter); this.endSession(); App.init(); }
+  async logout(){ try{ await apiJSON('/api/auth/logout',{method:'POST',body:'{}'}); }catch(e){} this.endSession(); App.init(); },
+  doReset(){ alert('Passwort-Reset laeuft serverseitig ueber Cloudflare KV. Loeschen Sie dafuer den Key "auth" im KV-Namespace oder erstellen Sie einen neuen Namespace.'); }
 };
 
 /* === CONTENT STORE (localStorage) === */
@@ -1014,24 +1017,50 @@ function getDefaultDesign(){
 
 var Cnt = {
   _d: null,
+  normalize: function(){
+    if(!Array.isArray(this._d.structure) || !this._d.structure.length) this._d.structure=getDefaultStructure();
+    if(!this._d.design) this._d.design=getDefaultDesign();
+    if(!this._d.testimonials) this._d.testimonials={label:'Kundenstimmen',title_plain:'Was unsere Kunden',title_gradient:'sagen',title_suffix:'',items:[]};
+    if(!this._d.faq) this._d.faq={label:'Häufige Fragen',title_plain:'Noch Fragen?',title_gradient:'wir haben Antworten',title_suffix:'',items:[]};
+    if(!this._d.cta) this._d.cta={title:'Bereit für Ihren Umzug?',text:'Kontaktieren Sie uns für ein kostenloses Erstgespräch.',btn_text:'Jetzt anbieten',btn_href:'#contact'};
+    if(!this._d.features) this._d.features={label:'Unsere Leistungen',title_plain:'Was wir',title_gradient:'bieten',title_suffix:'',items:[]};
+    if(!this._d.areas) this._d.areas=JSON.parse(JSON.stringify(DEF.areas));
+    if(!this._d.checklist) this._d.checklist=JSON.parse(JSON.stringify(DEF.checklist));
+    if(!this._d.gallery) this._d.gallery=JSON.parse(JSON.stringify(DEF.gallery));
+    if(!this._d.packages) this._d.packages=JSON.parse(JSON.stringify(DEF.packages));
+  },
+  load: async function(){
+    try{
+      this._d=validateImportedContent(await apiJSON('/api/content',{method:'GET'}));
+      this.normalize();
+      localStorage.setItem(K.data,JSON.stringify(this._d));
+      return true;
+    }catch(e){
+      this._d=null;
+      this.get();
+      toast('API nicht erreichbar, lokaler Fallback aktiv: '+e.message,false);
+      return false;
+    }
+  },
   get: function(){
     if(!this._d){
       try{ var s=localStorage.getItem(K.data); this._d=s?JSON.parse(s):JSON.parse(JSON.stringify(DEF)); }
       catch(e){ this._d=JSON.parse(JSON.stringify(DEF)); }
-      if(!Array.isArray(this._d.structure) || !this._d.structure.length) this._d.structure=getDefaultStructure();
-      if(!this._d.design) this._d.design=getDefaultDesign();
-      if(!this._d.testimonials) this._d.testimonials={label:'Kundenstimmen',title_plain:'Was unsere Kunden',title_gradient:'sagen',title_suffix:'',items:[]};
-      if(!this._d.faq) this._d.faq={label:'Häufige Fragen',title_plain:'Noch Fragen?',title_gradient:'wir haben Antworten',title_suffix:'',items:[]};
-      if(!this._d.cta) this._d.cta={title:'Bereit für Ihren Umzug?',text:'Kontaktieren Sie uns für ein kostenloses Erstgespräch.',btn_text:'Jetzt anbieten',btn_href:'#contact'};
-      if(!this._d.features) this._d.features={label:'Unsere Leistungen',title_plain:'Was wir',title_gradient:'bieten',title_suffix:'',items:[]};
-      if(!this._d.areas) this._d.areas=JSON.parse(JSON.stringify(DEF.areas));
-      if(!this._d.checklist) this._d.checklist=JSON.parse(JSON.stringify(DEF.checklist));
-      if(!this._d.gallery) this._d.gallery=JSON.parse(JSON.stringify(DEF.gallery));
-      if(!this._d.packages) this._d.packages=JSON.parse(JSON.stringify(DEF.packages));
+      this.normalize();
     }
     return this._d;
   },
-  save: function(){ localStorage.setItem(K.data,JSON.stringify(this._d)); },
+  save: async function(){
+    localStorage.setItem(K.data,JSON.stringify(this._d));
+    if(!API_AUTH) return false;
+    try{
+      await apiJSON('/api/content',{method:'PUT',body:JSON.stringify(this._d)});
+      return true;
+    }catch(e){
+      toast('Speichern in Cloudflare fehlgeschlagen: '+e.message,false);
+      return false;
+    }
+  },
   reset: function(){ this._d=null; localStorage.removeItem(K.data); },
   gf: function(path){ var parts=path.split('.'), o=this.get(); for(var i=0;i<parts.length;i++){ if(o==null) return ''; o=o[parts[i]]; } return o==null?'':o; },
   sf: function(path,val){ var parts=path.split('.'), o=this.get(); for(var i=0;i<parts.length-1;i++){ if(o[parts[i]]==null) o[parts[i]]=(isNaN(+parts[i+1])?{}:[]); o=o[parts[i]]; } o[parts[parts.length-1]]=val; }
@@ -1648,10 +1677,12 @@ var Settings = {
 
 /* === APP === */
 var App = {
-  init: function(){
+  init: async function(){
     $i('adminPanel').style.display='none'; $i('authScreen').style.display='';
-    if(!Auth.configured()) Auth.showSetup();
-    else if(Auth.sessionOk()) this.enter();
+    var status=await Auth.status();
+    API_AUTH=!!status.isAuthenticated;
+    if(!status.isSetup) Auth.showSetup();
+    else if(status.isAuthenticated){ await Cnt.load(); this.enter(); }
     else Auth.showLogin();
   },
   enter: function(){
@@ -1676,10 +1707,11 @@ var App = {
     TestimonialsEd.collect(); FaqEd.collect(); CtaEd.collect(); FeaturesEd.collect();
     AreasEd.collect(); ChecklistEd.collect(); GalleryEd.collect(); PackagesEd.collect();
   },
-  save: function(){
-    this.collectAll(); Cnt.save();
+  save: async function(){
+    this.collectAll();
+    var ok=await Cnt.save();
     Auth.startSession();
-    toast('Gespeichert! Änderungen sind auf der Website aktiv.');
+    toast(ok?'Gespeichert! Änderungen sind auf der Website aktiv.':'Lokal gespeichert. Cloudflare-Speicher nicht aktualisiert.',ok);
   }
 };
 
