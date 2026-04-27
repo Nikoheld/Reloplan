@@ -1,0 +1,8 @@
+node_modules/
+data/
+.env
+*.log
+package.json
+package-lock.json
+server.js
+images/_originals/

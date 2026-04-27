@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReloPlan Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f172a;--surface:#1e293b;--surface2:#243044;--border:#334155;
+  --text:#e2e8f0;--muted:#94a3b8;--accent:#3b82f6;--accent-h:#2563eb;
+  --success:#22c55e;--danger:#ef4444;--warn:#f59e0b;
+  --r:8px;--r-lg:14px;
+}
+html{font-size:14px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+a{color:var(--accent);text-decoration:none}
+
+/* ---- Auth ---- */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.08) 0%,transparent 60%),var(--bg)}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:2.5rem;width:100%;max-width:420px}
+.auth-brand{text-align:center;margin-bottom:2rem}
+.auth-brand h1{font-size:1.35rem;font-weight:700;color:var(--text)}
+.auth-brand p{font-size:.85rem;color:var(--muted);margin-top:.3rem}
+.auth-badge{display:inline-block;background:rgba(59,130,246,.12);color:var(--accent);font-size:.75rem;font-weight:600;padding:.3rem .8rem;border-radius:99px;margin-bottom:1.5rem}
+.form-label{display:block;font-size:.82rem;font-weight:500;color:var(--muted);margin-bottom:.4rem}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:.65rem .9rem;color:var(--text);font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+.form-group{margin-bottom:1.1rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.6rem 1.2rem;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;font-size:.875rem;font-weight:500;transition:background .15s,opacity .15s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--accent-h)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover:not(:disabled){background:var(--border)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover:not(:disabled){background:rgba(239,68,68,.25)}
+.btn-full{width:100%}
+.btn-sm{padding:.4rem .85rem;font-size:.8rem}
+.btn-icon{padding:.4rem;width:2rem;height:2rem;border-radius:var(--r)}
+.btn-xs{padding:.25rem .5rem;font-size:.72rem;border-radius:var(--r);width:1.75rem;height:1.75rem}
+.error-msg{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:var(--r);padding:.7rem 1rem;font-size:.85rem;margin-bottom:1rem;display:none}
+
+/* ---- Admin Layout ---- */
+#adminPanel{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:1.25rem;border-bottom:1px solid var(--border)}
+.sidebar-logo span{font-weight:700;font-size:1rem;color:var(--text)}
+.sidebar-logo small{display:block;font-size:.72rem;color:var(--success);margin-top:.2rem}
+.sidebar-section{padding:.5rem 0}
+.sidebar-label{padding:.5rem 1.25rem .25rem;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.nav-btn{display:flex;align-items:center;gap:.65rem;width:100%;padding:.6rem 1.25rem;background:none;border:none;color:var(--muted);cursor:pointer;text-align:left;font-size:.875rem;font-family:inherit;transition:background .15s,color .15s}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:rgba(59,130,246,.12);color:var(--accent);font-weight:500}
+.nav-btn svg{flex-shrink:0;opacity:.65}
+.nav-btn.active svg{opacity:1}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.topbar-left{font-size:1rem;font-weight:600;color:var(--text)}
+.topbar-right{display:flex;gap:.6rem;align-items:center}
+.content{padding:1.75rem;flex:1;max-width:860px}
+
+/* ---- Cards ---- */
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;margin-bottom:1.25rem}
+.section-card-title{font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:640px){.form-row{grid-template-columns:1fr}}
+textarea.form-input{resize:vertical;min-height:80px}
+
+/* ---- Tags ---- */
+.tags-wrap{border:1px solid var(--border);border-radius:var(--r);background:var(--bg);padding:.4rem .5rem;display:flex;flex-wrap:wrap;gap:.35rem;cursor:text;min-height:40px}
+.tags-wrap:focus-within{border-color:var(--accent)}
+.tag{display:inline-flex;align-items:center;gap:.3rem;background:rgba(59,130,246,.15);color:var(--accent);padding:.2rem .6rem;border-radius:99px;font-size:.78rem;font-weight:500}
+.tag button{background:none;border:none;color:inherit;cursor:pointer;padding:0;line-height:1;font-size:1rem;opacity:.7}
+.tag button:hover{opacity:1}
+.tags-input{border:none;background:transparent;color:var(--text);font-family:inherit;font-size:.85rem;outline:none;min-width:80px;flex:1;padding:.1rem 0}
+
+/* ---- Dynamic Lists ---- */
+.dynamic-list{display:flex;flex-direction:column;gap:.75rem}
+.list-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem}
+.list-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.list-card-title{font-size:.875rem;font-weight:600;color:var(--text)}
+.list-card-actions{display:flex;gap:.35rem}
+
+/* ---- Image Upload ---- */
+.img-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+.img-preview{width:80px;height:80px;border-radius:var(--r);object-fit:cover;border:2px solid var(--border);background:var(--surface2);display:block}
+.img-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);border-radius:var(--r);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;color:#fff}
+.img-wrap:hover .img-overlay{opacity:1}
+
+/* ---- Page Structure ---- */
+.struct-item{display:flex;align-items:center;gap:.5rem;padding:.6rem .85rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.35rem}
+.struct-item.active{border-color:var(--accent);background:rgba(59,130,246,.08)}
+.struct-item.locked{opacity:.65}
+.struct-name{flex:1;font-size:.85rem;font-weight:500}
+.struct-toggle{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--muted)}
+.struct-chk{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.struct-btns{display:flex;gap:.2rem}
+.struct-toolbar{position:relative;margin-left:auto}
+.struct-add-panel{display:none;position:absolute;right:0;top:calc(100% + .5rem);z-index:20;width:min(280px,calc(100vw - 2rem));background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 18px 45px rgba(0,0,0,.25);padding:.45rem}
+.struct-add-panel.open{display:block}
+.add-btn-item{display:flex;align-items:center;gap:.5rem;width:100%;padding:.5rem .85rem;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r);margin-bottom:.3rem;cursor:pointer;font-family:inherit;font-size:.85rem;color:var(--text);text-align:left}
+.add-btn-item:last-child{margin-bottom:0}
+.add-btn-item:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---- Design Editor ---- */
+.design-color-row{display:flex;gap:.6rem;align-items:center;margin-bottom:.75rem}
+.color-swatch{width:44px;height:34px;border-radius:var(--r);border:2px solid var(--border);cursor:pointer;flex-shrink:0;overflow:hidden}
+.color-swatch input[type=color]{width:60px;height:50px;border:none;cursor:pointer;padding:0;background:transparent}
+.design-font-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.font-option{padding:.75rem;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;text-align:center;transition:border-color .2s,background .2s}
+.font-option:hover{border-color:var(--accent)}
+.font-option.selected{border-color:var(--accent);background:rgba(59,130,246,.1)}
+.spacing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.spacing-option{padding:.75rem;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;text-align:center;transition:border-color .2s,background .2s;font-size:.85rem;font-weight:500}
+.spacing-option.selected{border-color:var(--accent);background:rgba(59,130,246,.1)}
+
+/* ---- Toast ---- */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
+.toast-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.7rem 1rem;font-size:.85rem;display:flex;align-items:center;gap:.6rem;max-width:300px;pointer-events:auto;animation:toastIn .2s ease}
+.toast-item.ok{border-color:rgba(34,197,94,.4);color:#86efac}
+.toast-item.err{border-color:rgba(239,68,68,.4);color:#fca5a5}
+@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+.empty-hint{text-align:center;padding:1.75rem;color:var(--muted);font-size:.875rem}
+</style>
+</head>
+<body>
+
+<!-- ======= AUTH SCREEN ======= -->
+<div id="authScreen">
+<div class="auth-card">
+  <div class="auth-brand">
+    <div class="auth-badge">Admin-Bereich</div>
+    <h1>ReloPlan AG</h1>
+    <p>Website-Verwaltung</p>
+  </div>
+  <div id="setupForm" style="display:none">
+    <p style="font-size:.875rem;color:var(--muted);margin-bottom:1.5rem;text-align:center">Willkommen! Legen Sie ein Admin-Passwort fest.</p>
+    <div id="setupError" class="error-msg"></div>
+    <div class="form-group">
+      <label class="form-label" for="setupPwd">Neues Passwort</label>
+      <input class="form-input" type="password" id="setupPwd" placeholder="Mindestens 12 Zeichen" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="setupPwd2">Passwort bestätigen</label>
+      <input class="form-input" type="password" id="setupPwd2" placeholder="Passwort wiederholen" autocomplete="new-password">
+    </div>
+    <button class="btn btn-primary btn-full" id="setupBtn" onclick="Auth.setup()">Passwort festlegen</button>
+  </div>
+  <div id="loginForm" style="display:none">
+    <div id="loginError" class="error-msg"></div>
+    <div class="form-group">
+      <label class="form-label" for="loginPwd">Passwort</label>
+      <input class="form-input" type="password" id="loginPwd" placeholder="Admin-Passwort" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" id="loginBtn" onclick="Auth.login()">Anmelden</button>
+    <p style="text-align:center;margin-top:.9rem">
+      <button onclick="Auth.showReset()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit">Passwort vergessen?</button>
+    </p>
+  </div>
+  <div id="resetForm" style="display:none">
+    <p style="font-size:.875rem;color:var(--muted);margin-bottom:1.5rem;text-align:center">Das gespeicherte Passwort wird gelöscht. Danach können Sie ein neues festlegen.</p>
+    <button class="btn btn-danger btn-full" onclick="Auth.doReset()" style="margin-bottom:.75rem">Passwort zurücksetzen</button>
+    <button class="btn btn-secondary btn-full" onclick="Auth.showLogin()">Abbrechen</button>
+  </div>
+</div>
+</div>
+
+<!-- ======= ADMIN PANEL ======= -->
+<div id="adminPanel" style="display:none">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>ReloPlan Admin</span>
+      <small id="sessionDot">&#9679; Aktive Sitzung</small>
+    </div>
+    <nav class="sidebar-section">
+      <div class="sidebar-label">Seite</div>
+      <button class="nav-btn active" onclick="UI.tab(this,'struktur')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Seitenstruktur
+      </button>
+      <button class="nav-btn" onclick="UI.tab(this,'design')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Design
+      </button>
+      <div class="sidebar-label" style="margin-top:.75rem">Module</div>
+      <button class="nav-btn" onclick="UI.tab(this,'seo')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>SEO &amp; Seite
+      </button>
+      <button class="nav-btn" data-module-tab="hero" onclick="UI.tab(this,'hero')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Hero
+      </button>
+      <button class="nav-btn" data-module-tab="about" onclick="UI.tab(this,'about')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>Über uns
+      </button>
+      <button class="nav-btn" data-module-tab="process" onclick="UI.tab(this,'process')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Prozess
+      </button>
+      <button class="nav-btn" data-module-tab="whoweare" onclick="UI.tab(this,'whoweare')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Wer wir sind
+      </button>
+      <button class="nav-btn" data-module-tab="team" onclick="UI.tab(this,'team')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Team
+      </button>
+      <button class="nav-btn" data-module-tab="testimonials" onclick="UI.tab(this,'testimonials')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Kundenrezensionen
+      </button>
+      <button class="nav-btn" data-module-tab="faq" onclick="UI.tab(this,'faq')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>FAQ
+      </button>
+      <button class="nav-btn" data-module-tab="cta" onclick="UI.tab(this,'cta')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>CTA-Banner
+      </button>
+      <button class="nav-btn" data-module-tab="features" onclick="UI.tab(this,'features')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Leistungen
+      </button>
+      <button class="nav-btn" data-module-tab="areas" onclick="UI.tab(this,'areas')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Einsatzgebiete
+      </button>
+      <button class="nav-btn" data-module-tab="checklist" onclick="UI.tab(this,'checklist')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Checkliste
+      </button>
+      <button class="nav-btn" data-module-tab="gallery" onclick="UI.tab(this,'gallery')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Galerie
+      </button>
+      <button class="nav-btn" data-module-tab="packages" onclick="UI.tab(this,'packages')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Pakete
+      </button>
+      <button class="nav-btn" data-module-tab="contact" onclick="UI.tab(this,'contact')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Kontakt
+      </button>
+      <button class="nav-btn" onclick="UI.tab(this,'footer')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 15h18M9 15v6M15 15v6"/></svg>Fusszeile
+      </button>
+      <button class="nav-btn" onclick="UI.tab(this,'nav')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>Navigation
+      </button>
+    </nav>
+    <div class="sidebar-section" style="border-top:1px solid var(--border);margin-top:auto">
+      <div class="sidebar-label">System</div>
+      <button class="nav-btn" onclick="UI.tab(this,'settings')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Einstellungen
+      </button>
+      <button class="nav-btn" onclick="Auth.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Abmelden
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-left" id="topbarTitle">Seitenstruktur</span>
+      <div class="topbar-right">
+        <a href="../" target="_blank" class="btn btn-secondary btn-sm">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Vorschau
+        </a>
+        <button class="btn btn-primary btn-sm" onclick="App.save()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Speichern <span style="color:rgba(255,255,255,.55);font-size:.75rem">Ctrl+S</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- SEITENSTRUKTUR -->
+      <div id="tab-struktur">
+        <div class="section-card">
+          <div class="section-card-title">
+            Modul-Reihenfolge
+            <span style="margin-left:auto;font-size:.72rem;font-weight:400;color:var(--muted)">Aktiv = sichtbar auf Website</span>
+            <div class="struct-toolbar">
+              <button class="btn btn-secondary btn-icon" id="struktur-add-btn" type="button" title="Modul hinzufügen" aria-haspopup="true" aria-expanded="false">+</button>
+              <div class="struct-add-panel" id="struktur-add-panel"></div>
+            </div>
+          </div>
+          <div id="struktur-list"></div>
+        </div>
+      </div>
+
+      <!-- DESIGN -->
+      <div id="tab-design" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Hauptfarbe</div>
+          <div class="design-color-row">
+            <div class="color-swatch" id="swatch-primary">
+              <input type="color" id="f-primary-color" value="#3b82f6" oninput="Design.updateSwatch('primary',this.value)">
+            </div>
+            <input class="form-input" type="text" id="f-primary-hex" value="#3b82f6" maxlength="7" style="flex:1" oninput="Design.hexInput('primary',this)">
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Akzentfarbe</div>
+          <div class="design-color-row">
+            <div class="color-swatch" id="swatch-accent">
+              <input type="color" id="f-accent-color" value="#f59e0b" oninput="Design.updateSwatch('accent',this.value)">
+            </div>
+            <input class="form-input" type="text" id="f-accent-hex" value="#f59e0b" maxlength="7" style="flex:1" oninput="Design.hexInput('accent',this)">
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Schriftart (Überschriften)</div>
+          <div class="design-font-grid" id="font-grid"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Abstand zwischen Abschnitten</div>
+          <div class="spacing-grid" id="spacing-grid"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">
+            Border-Radius
+            <span style="margin-left:auto;font-size:.8rem;color:var(--muted)" id="radius-val">8px</span>
+          </div>
+          <input type="range" class="design-range" id="f-radius" min="0" max="32" value="8" oninput="Design.radiusInput(this.value)">
+          <p class="form-hint" style="margin-top:.5rem">Rundheit der Karten und Elemente</p>
+        </div>
+      </div>
+
+      <!-- SEO -->
+      <div id="tab-seo" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Suchmaschinenoptimierung</div>
+          <div class="form-group">
+            <label class="form-label" for="f-meta-title">Seitentitel (Browser-Tab)</label>
+            <input class="form-input" type="text" id="f-meta-title" data-field="meta.title" maxlength="70">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-meta-desc">Meta-Beschreibung</label>
+            <textarea class="form-input" id="f-meta-desc" data-field="meta.description" maxlength="160"></textarea>
+          </div>
+          <hr class="divider">
+          <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;font-weight:500">Open Graph (Social Media Vorschau)</p>
+          <div class="form-group">
+            <label class="form-label" for="f-og-title">OG-Titel <span style="font-weight:400">(leer = Seitentitel)</span></label>
+            <input class="form-input" type="text" id="f-og-title" data-field="meta.og_title" maxlength="95">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-og-desc">OG-Beschreibung <span style="font-weight:400">(leer = Meta-Beschreibung)</span></label>
+            <textarea class="form-input" id="f-og-desc" data-field="meta.og_description" style="min-height:60px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- HERO -->
+      <div id="tab-hero" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Hero-Bereich</div>
+          <div class="form-group">
+            <label class="form-label" for="f-hero-badge">Badge-Text (oberhalb des Titels)</label>
+            <input class="form-input" type="text" id="f-hero-badge" data-field="hero.badge" maxlength="80">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-hero-l1">Titelzeile 1</label>
+              <input class="form-input" type="text" id="f-hero-l1" data-field="hero.title_line1">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-hero-l2">Titelzeile 2 (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-hero-l2" data-field="hero.title_line2">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-hero-sub">Untertitel</label>
+            <textarea class="form-input" id="f-hero-sub" data-field="hero.subtitle" maxlength="220"></textarea>
+          </div>
+          <hr class="divider">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-hero-b1">Button 1 Text</label>
+              <input class="form-input" type="text" id="f-hero-b1" data-field="hero.btn_primary">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-hero-b1h">Button 1 Ziel</label>
+              <input class="form-input" type="text" id="f-hero-b1h" data-field="hero.btn_primary_href" placeholder="#contact">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-hero-b2">Button 2 Text</label>
+              <input class="form-input" type="text" id="f-hero-b2" data-field="hero.btn_outline">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-hero-b2h">Button 2 Ziel</label>
+              <input class="form-input" type="text" id="f-hero-b2h" data-field="hero.btn_outline_href" placeholder="#process">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÜBER UNS -->
+      <div id="tab-about" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Abschnittstitel</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-about-lbl">Label (klein, oben)</label>
+              <input class="form-input" type="text" id="f-about-lbl" data-field="about.label">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-about-suf">Titel-Anhang</label>
+              <input class="form-input" type="text" id="f-about-suf" data-field="about.title_suffix">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-about-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-about-pl" data-field="about.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-about-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-about-gr" data-field="about.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Textabsätze</div>
+          <div id="about-paras" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="AboutEd.addPara()">+ Absatz hinzufügen</button>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Statistiken</div>
+          <div id="about-stats" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="AboutEd.addStat()">+ Statistik hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- PROZESS -->
+      <div id="tab-process" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Abschnittstitel</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-proc-lbl">Label</label>
+              <input class="form-input" type="text" id="f-proc-lbl" data-field="process.label">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-proc-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-proc-pl" data-field="process.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-proc-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-proc-gr" data-field="process.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Prozessschritte</div>
+          <div id="proc-steps" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="ProcessEd.add()">+ Schritt hinzufügen</button>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Hinweis-Balken</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-proc-bt">Balken Titel</label>
+              <input class="form-input" type="text" id="f-proc-bt" data-field="process.bar_title">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-proc-bs">Balken Untertitel</label>
+              <input class="form-input" type="text" id="f-proc-bs" data-field="process.bar_subtitle">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WER WIR SIND -->
+      <div id="tab-whoweare" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Bild &amp; Titel</div>
+          <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem">
+            <div class="img-wrap">
+              <img id="who-img" class="img-preview" src="../images/team.jpg" alt="">
+              <button class="img-overlay" onclick="document.getElementById('who-file').click()" title="Bild hochladen">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </button>
+              <input type="file" id="who-file" style="display:none" accept="image/*" onchange="WhoEd.upload(this)">
+            </div>
+            <div style="flex:1">
+              <div class="form-group">
+                <label class="form-label" for="f-who-alt">Bild Alt-Text</label>
+                <input class="form-input" type="text" id="f-who-alt" data-field="whoweare.image_alt">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-who-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-who-pl" data-field="whoweare.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-who-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-who-gr" data-field="whoweare.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Textabsätze</div>
+          <div id="who-paras" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="WhoEd.addPara()">+ Absatz hinzufügen</button>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Abschluss-Satz (hervorgehoben)</div>
+          <div class="form-group">
+            <label class="form-label" for="f-who-cta">CTA-Text</label>
+            <input class="form-input" type="text" id="f-who-cta" data-field="whoweare.cta">
+          </div>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div id="tab-team" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Abschnittstitel</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-team-lbl">Label</label>
+              <input class="form-input" type="text" id="f-team-lbl" data-field="team.label">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-team-suf">Titel-Anhang</label>
+              <input class="form-input" type="text" id="f-team-suf" data-field="team.title_suffix">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-team-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-team-pl" data-field="team.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-team-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-team-gr" data-field="team.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Teammitglieder</div>
+          <div id="team-members" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="TeamEd.add()">+ Mitglied hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- KUNDENREZENSIONEN -->
+      <div id="tab-testimonials" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Abschnittstitel</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-test-lbl">Label</label>
+              <input class="form-input" type="text" id="f-test-lbl" data-field="testimonials.label">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-test-suf">Titel-Anhang</label>
+              <input class="form-input" type="text" id="f-test-suf" data-field="testimonials.title_suffix">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-test-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-test-pl" data-field="testimonials.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-test-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-test-gr" data-field="testimonials.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Kundenrezensionen</div>
+          <div id="testimonials-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="TestimonialsEd.add()">+ Rezension hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div id="tab-faq" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Abschnittstitel</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-faq-lbl">Label</label>
+              <input class="form-input" type="text" id="f-faq-lbl" data-field="faq.label">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-faq-suf">Titel-Anhang</label>
+              <input class="form-input" type="text" id="f-faq-suf" data-field="faq.title_suffix">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-faq-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-faq-pl" data-field="faq.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-faq-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-faq-gr" data-field="faq.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Häufig gestellte Fragen</div>
+          <div id="faq-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="FaqEd.add()">+ Frage hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- CTA-BANNER -->
+      <div id="tab-cta" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">CTA-Banner</div>
+          <div class="form-group">
+            <label class="form-label" for="f-cta-title">Titel</label>
+            <input class="form-input" type="text" id="f-cta-title" data-field="cta.title">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-cta-text">Text</label>
+            <textarea class="form-input" id="f-cta-text" data-field="cta.text" rows="3"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-cta-btn">Button-Text</label>
+              <input class="form-input" type="text" id="f-cta-btn" data-field="cta.btn_text">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-cta-href">Button-Ziel</label>
+              <input class="form-input" type="text" id="f-cta-href" data-field="cta.btn_href" placeholder="#contact">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEISTUNGEN -->
+      <div id="tab-features" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Abschnittstitel</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-feat-lbl">Label</label>
+              <input class="form-input" type="text" id="f-feat-lbl" data-field="features.label">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-feat-suf">Titel-Anhang</label>
+              <input class="form-input" type="text" id="f-feat-suf" data-field="features.title_suffix">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-feat-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-feat-pl" data-field="features.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-feat-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-feat-gr" data-field="features.title_gradient">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Leistungen</div>
+          <div id="features-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="FeaturesEd.add()">+ Leistung hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- EINSATZGEBIETE -->
+      <div id="tab-areas" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Einsatzgebiete</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Label</label><input class="form-input" data-field="areas.label"></div>
+            <div class="form-group"><label class="form-label">Titel-Anhang</label><input class="form-input" data-field="areas.title_suffix"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Titel (normal)</label><input class="form-input" data-field="areas.title_plain"></div>
+            <div class="form-group"><label class="form-label">Titel (Gradient-Farbe)</label><input class="form-input" data-field="areas.title_gradient"></div>
+          </div>
+          <div id="areas-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="AreasEd.add()">+ Gebiet hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- CHECKLISTE -->
+      <div id="tab-checklist" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Checkliste</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Label</label><input class="form-input" data-field="checklist.label"></div>
+            <div class="form-group"><label class="form-label">Titel-Anhang</label><input class="form-input" data-field="checklist.title_suffix"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Titel (normal)</label><input class="form-input" data-field="checklist.title_plain"></div>
+            <div class="form-group"><label class="form-label">Titel (Gradient-Farbe)</label><input class="form-input" data-field="checklist.title_gradient"></div>
+          </div>
+          <div id="checklist-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="ChecklistEd.add()">+ Punkt hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- GALERIE -->
+      <div id="tab-gallery" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Bildergalerie</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Label</label><input class="form-input" data-field="gallery.label"></div>
+            <div class="form-group"><label class="form-label">Titel-Anhang</label><input class="form-input" data-field="gallery.title_suffix"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Titel (normal)</label><input class="form-input" data-field="gallery.title_plain"></div>
+            <div class="form-group"><label class="form-label">Titel (Gradient-Farbe)</label><input class="form-input" data-field="gallery.title_gradient"></div>
+          </div>
+          <div id="gallery-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="GalleryEd.add()">+ Bild hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- PAKETE -->
+      <div id="tab-packages" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Paketübersicht</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Label</label><input class="form-input" data-field="packages.label"></div>
+            <div class="form-group"><label class="form-label">Titel-Anhang</label><input class="form-input" data-field="packages.title_suffix"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Titel (normal)</label><input class="form-input" data-field="packages.title_plain"></div>
+            <div class="form-group"><label class="form-label">Titel (Gradient-Farbe)</label><input class="form-input" data-field="packages.title_gradient"></div>
+          </div>
+          <div id="packages-items" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="PackagesEd.add()">+ Paket hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- KONTAKT -->
+      <div id="tab-contact" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Titel &amp; Einleitung</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-ct-pl">Titel (normal)</label>
+              <input class="form-input" type="text" id="f-ct-pl" data-field="contact.title_plain">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-ct-gr">Titel (Gradient-Farbe)</label>
+              <input class="form-input" type="text" id="f-ct-gr" data-field="contact.title_gradient">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-ct-intro">Einleitungstext</label>
+            <textarea class="form-input" id="f-ct-intro" data-field="contact.intro"></textarea>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Kontaktangaben</div>
+          <div class="form-group">
+            <label class="form-label" for="f-ct-email">E-Mail-Adresse</label>
+            <input class="form-input" type="email" id="f-ct-email" data-field="contact.email">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-ct-phd">Telefon (Anzeige)</label>
+              <input class="form-input" type="text" id="f-ct-phd" data-field="contact.phone_display" placeholder="+41 44 123 45 67">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-ct-phh">Telefon (tel:-Link, ohne Leerzeichen)</label>
+              <input class="form-input" type="text" id="f-ct-phh" data-field="contact.phone_href" placeholder="+41441234567">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-ct-addr">Adresse</label>
+            <input class="form-input" type="text" id="f-ct-addr" data-field="contact.address">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-ct-li">LinkedIn-Unternehmensname</label>
+            <input class="form-input" type="text" id="f-ct-li" data-field="contact.linkedin" placeholder="reloplan-ag">
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Google Maps Einbettung</div>
+          <div class="form-group">
+            <label class="form-label" for="f-ct-map">Embed-URL</label>
+            <input class="form-input" type="text" id="f-ct-map" data-field="contact.map_src" placeholder="https://www.google.com/maps/embed?pb=...">
+            <p class="form-hint">Google Maps -> Standort suchen -> Teilen -> Karte einbetten -> Link kopieren</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FUSSZEILE -->
+      <div id="tab-footer" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Fusszeile</div>
+          <div class="form-group">
+            <label class="form-label" for="f-ft-tag">Slogan (unter dem Logo)</label>
+            <input class="form-input" type="text" id="f-ft-tag" data-field="footer.tagline">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-ft-copy">Copyright-Text</label>
+            <input class="form-input" type="text" id="f-ft-copy" data-field="footer.copyright">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-ft-cred">Credit-Text (rechts)</label>
+            <input class="form-input" type="text" id="f-ft-cred" data-field="footer.credit">
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGATION -->
+      <div id="tab-nav" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Navigationslinks</div>
+          <div id="nav-links" class="dynamic-list"></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:.75rem" onclick="NavEd.add()">+ Link hinzufügen</button>
+        </div>
+      </div>
+
+      <!-- EINSTELLUNGEN -->
+      <div id="tab-settings" style="display:none">
+        <div class="section-card">
+          <div class="section-card-title">Daten</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.1rem">
+            <button class="btn btn-secondary" onclick="Settings.exportJSON()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>JSON exportieren
+            </button>
+            <button class="btn btn-secondary" onclick="Settings.exportHTML()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>HTML exportieren
+            </button>
+            <label class="btn btn-secondary" style="cursor:pointer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>JSON importieren
+              <input type="file" accept=".json" style="display:none" onchange="Settings.importJSON(this)">
+            </label>
+          </div>
+          <p style="font-size:.8rem;color:var(--muted);line-height:1.7">
+            <strong style="color:var(--text)">JSON exportieren:</strong> Alle Inhalte als Backup-Datei speichern.<br>
+            <strong style="color:var(--text)">HTML exportieren:</strong> Fertige HTML-Datei mit eingebetteten Inhalten (für statisches Hosting).<br>
+            <strong style="color:var(--text)">JSON importieren:</strong> Inhalte aus einer Backup-Datei wiederherstellen.
+          </p>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Inhalte zurücksetzen</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Alle gespeicherten Texte und Bilder löschen und auf Standardwerte zurücksetzen.</p>
+          <button class="btn btn-danger" onclick="Settings.resetContent()">Inhalte zurücksetzen</button>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Passwort ändern</div>
+          <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Admin-Passwort löschen und neu festlegen. Sie werden danach abgemeldet.</p>
+          <button class="btn btn-danger" onclick="Settings.changePassword()">Passwort zurücksetzen</button>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Sitzung</div>
+          <p style="font-size:.85rem;color:var(--muted)" id="session-info">Sitzungsdauer: 2 Stunden ab Anmeldung.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+/* ---- Keys ---- */
+const K = {
+  hash:'rp_admin_hash', salt:'rp_admin_salt',
+  tok:'rp_session_token', exp:'rp_session_expiry',
+  data:'rp_site_content', att:'rp_login_att', lock:'rp_lockout', iter:'rp_admin_iter'
+};
+const SESSION_MS = 7200000; // 2h
+const KDF_ITER = 310000;
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCK_MS = 900000; // 15 min
+const IMPORT_MAX_BYTES = 750000;
+const MODULE_TYPES = ['hero','about','process','whoweare','team','testimonials','faq','cta','features','areas','checklist','gallery','packages','contact'];
+
+/* ---- Helpers ---- */
+function $i(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function adminImgSrc(src){ src=String(src||''); return src.indexOf('images/')===0 ? '../'+src : src; }
+function toast(msg, ok=true){
+  const c=$i('toast'), d=document.createElement('div');
+  d.className='toast-item '+(ok?'ok':'err');
+  d.innerHTML=(ok?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>')+esc(msg);
+  c.appendChild(d);
+  setTimeout(()=>{d.style.cssText='opacity:0;transition:opacity .3s';setTimeout(()=>d.remove(),300);},3000);
+}
+
+/* === AUTH (PBKDF2, localStorage, no server) === */
+const Auth = {
+  async _hash(pwd, salt, iter){
+    const e=new TextEncoder(), k=await crypto.subtle.importKey('raw',e.encode(pwd),'PBKDF2',false,['deriveBits']);
+    const b=await crypto.subtle.deriveBits({name:'PBKDF2',salt:e.encode(salt),iterations:iter||KDF_ITER,hash:'SHA-256'},k,256);
+    return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  },
+  _rand(n=32){ return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(x=>x.toString(16).padStart(2,'0')).join(''); },
+  lockRemaining(){
+    var until=+localStorage.getItem(K.lock)||0;
+    var left=until-Date.now();
+    if(left<=0){ localStorage.removeItem(K.lock); return 0; }
+    return left;
+  },
+  clearAttempts(){ localStorage.removeItem(K.att); localStorage.removeItem(K.lock); },
+  recordFailedAttempt(){
+    var attempts=(+localStorage.getItem(K.att)||0)+1;
+    localStorage.setItem(K.att,String(attempts));
+    if(attempts>=LOGIN_MAX_ATTEMPTS){
+      localStorage.setItem(K.lock,String(Date.now()+LOGIN_LOCK_MS));
+      localStorage.removeItem(K.att);
+    }
+  },
+  configured(){ return !!localStorage.getItem(K.hash); },
+  startSession(){
+    localStorage.setItem(K.tok, this._rand());
+    localStorage.setItem(K.exp, String(Date.now()+SESSION_MS));
+  },
+  sessionOk(){
+    if(!localStorage.getItem(K.tok)) return false;
+    const exp=+localStorage.getItem(K.exp)||0;
+    if(Date.now()>exp){ localStorage.removeItem(K.tok); localStorage.removeItem(K.exp); return false; }
+    return true;
+  },
+  endSession(){ localStorage.removeItem(K.tok); localStorage.removeItem(K.exp); },
+  showLogin(){ $i('setupForm').style.display=$i('resetForm').style.display='none'; $i('loginForm').style.display=''; $i('loginError').style.display='none'; $i('loginPwd').value=''; setTimeout(function(){ $i('loginPwd').focus(); },50); },
+  showSetup(){ $i('loginForm').style.display=$i('resetForm').style.display='none'; $i('setupForm').style.display=''; setTimeout(function(){ $i('setupPwd').focus(); },50); },
+  showReset(){ $i('loginForm').style.display=$i('setupForm').style.display='none'; $i('resetForm').style.display=''; },
+  async setup(){
+    var p=$i('setupPwd').value, p2=$i('setupPwd2').value, e=$i('setupError');
+    e.style.display='none';
+    if(p.length<12){ e.textContent='Mindestens 12 Zeichen erforderlich.'; e.style.display=''; return; }
+    if(!/[a-z]/.test(p)||!/[A-Z]/.test(p)||!/[0-9]/.test(p)){ e.textContent='Bitte Gross-/Kleinbuchstaben und Zahlen verwenden.'; e.style.display=''; return; }
+    if(p!==p2){ e.textContent='Passwörter stimmen nicht überein.'; e.style.display=''; return; }
+    var btn=$i('setupBtn'); btn.disabled=true; btn.textContent='Wird gespeichert…';
+    try{
+      var salt=this._rand(16), hash=await this._hash(p,salt,KDF_ITER);
+      localStorage.setItem(K.salt,salt); localStorage.setItem(K.hash,hash); localStorage.setItem(K.iter,String(KDF_ITER));
+      this.startSession(); App.enter();
+    }catch(err){ e.textContent='Fehler: '+err.message; e.style.display=''; btn.disabled=false; btn.textContent='Passwort festlegen'; }
+  },
+  async login(){
+    var e=$i('loginError'); e.style.display='none';
+    var lock=this.lockRemaining();
+    if(lock){ e.textContent='Zu viele Fehlversuche. Bitte in '+Math.ceil(lock/60000)+' Minuten erneut versuchen.'; e.style.display=''; return; }
+    var p=$i('loginPwd').value;
+    if(!p){ e.textContent='Bitte Passwort eingeben.'; e.style.display=''; return; }
+    var btn=$i('loginBtn'); btn.disabled=true; btn.textContent='Wird geprüft…';
+    try{
+      var iter=+localStorage.getItem(K.iter)||100000;
+      var h=await this._hash(p, localStorage.getItem(K.salt), iter);
+      if(h===localStorage.getItem(K.hash)){
+        if(iter!==KDF_ITER){
+          var salt=this._rand(16), hash=await this._hash(p,salt,KDF_ITER);
+          localStorage.setItem(K.salt,salt); localStorage.setItem(K.hash,hash); localStorage.setItem(K.iter,String(KDF_ITER));
+        }
+        this.clearAttempts(); this.startSession(); App.enter();
+      } else {
+        this.recordFailedAttempt();
+        e.textContent='Falsches Passwort.'; e.style.display='';
+        btn.disabled=false; btn.textContent='Anmelden'; $i('loginPwd').value=''; $i('loginPwd').focus();
+      }
+    }catch(err){ e.textContent='Fehler: '+err.message; e.style.display=''; btn.disabled=false; btn.textContent='Anmelden'; }
+  },
+  logout(){ this.endSession(); App.init(); },
+  doReset(){ localStorage.removeItem(K.hash); localStorage.removeItem(K.salt); localStorage.removeItem(K.iter); this.endSession(); App.init(); }
+};
+
+/* === CONTENT STORE (localStorage) === */
+var DEF = {
+  meta:{title:'ReloPlan AG – Professionelles Umzugsmanagement',description:'ReloPlan AG – Wir planen und steuern deinen Umzug. Von der Konzeption bis zur erfolgreichen Umsetzung. 30+ Jahre Erfahrung, 3 Spezialisten, 100% Engagement.',og_title:'',og_description:''},
+  nav:{links:[{href:'#about',label:'Über uns'},{href:'#process',label:'Prozess'},{href:'#team',label:'Team'},{href:'#contact',label:'Kontakt'}]},
+  hero:{badge:'Schweizer Umzugsspezialist',title_line1:'Wir planen.',title_line2:'Du bewegst.',subtitle:'ReloPlan AG begleitet Sie von der ersten Idee bis zum letzten Karton – professionell, persönlich, präzise.',btn_primary:'Jetzt kontaktieren',btn_primary_href:'#contact',btn_outline:'Unser Prozess',btn_outline_href:'#process'},
+  about:{label:'Über uns',title_plain:'Ihr Umzug —',title_gradient:'unsere Leidenschaft',title_suffix:'',paragraphs:[
+    'ReloPlan AG ist Ihr zuverlässiger Partner für jeden Umzug in der Schweiz. Mit über 30 Jahren Erfahrung kennen wir jede Herausforderung – und wissen, wie wir sie meistern.',
+    'Wir übernehmen die gesamte Planung und Koordination Ihres Umzugs: von der Bestandsaufnahme über die Abstimmung mit Handwerkern und Transportunternehmen bis hin zur finalen Übergabe.',
+    'Unsere drei Spezialisten bringen nicht nur Fachkenntnis mit, sondern auch das nötige Einfühlungsvermögen.'
+  ],stats:[{count:30,suffix:'+','label':'Jahre Erfahrung'},{count:3,suffix:'','label':'Spezialisten'},{count:100,suffix:'%','label':'Engagement'}]},
+  process:{label:'Unser Prozess',title_plain:'In 5 Schritten zu Ihrem',title_gradient:'neuen Zuhause',steps:[
+    {title:'Erstgespräch',description:'Wir analysieren Ihre Bedürfnisse und klären alle Details für einen reibungslosen Start.'},
+    {title:'Detailplanung',description:'Wir erstellen einen präzisen Zeitplan mit Kostenrahmen und koordinieren alle Dienstleister.'},
+    {title:'Koordination',description:'Wir stimmen alle Beteiligten ab und behalten jederzeit den Überblick – Sie lehnen sich zurück.'},
+    {title:'Umzugstag',description:'Wir begleiten Sie persönlich am großen Tag und sorgen für einen pünktlichen, sicheren Ablauf.'},
+    {title:'Abschluss',description:'Wir begleiten Sie bis alles sitzt und stehen auch nach dem Umzug für Fragen zur Verfügung.'}
+  ],bar_title:'Kostenloses Erstgespräch',bar_subtitle:'Jetzt unverbindlich anfragen – wir melden uns innerhalb von 24 Stunden.'},
+  whoweare:{image_src:'images/team.jpg',image_alt:'Das ReloPlan-Team bei der Arbeit',title_plain:'Wer',title_gradient:'wir sind',paragraphs:[
+    'ReloPlan AG wurde gegründet, weil wir selbst erlebt haben, wie stressig ein Umzug sein kann – und wie viel einfacher er mit der richtigen Unterstützung wird.',
+    'Wir arbeiten nicht mit Standardlösungen. Jeder Umzug ist einzigartig – und bekommt von uns die individuelle Aufmerksamkeit, die er verdient.'
+  ],cta:'Bereit für Ihren stressfreien Umzug?'},
+  team:{label:'Unser Team',title_plain:'Die Menschen hinter',title_gradient:'ReloPlan',title_suffix:'',members:[
+    {name:'Roger Schwendener',role:'Gründer & CEO',description:'Mit über 30 Jahren Erfahrung in der Umzugsbranche steht Roger für Qualität und Zuverlässigkeit.',email:'r.schwendener@reloplan.ch',image:'images/roger-schwendener.jpg',image_alt:'Portrait von Roger Schwendener',references:['UBS','Swisscom','ABB']},
+    {name:'Marco Buser',role:'Umzugsexperte',description:'Marco ist unser Spezialist für komplexe Umzugsprojekte. Sein logisches Denken garantiert, dass kein Karton am falschen Ort landet.',email:'m.buser@reloplan.ch',image:'images/marco-buser.jpg',image_alt:'Portrait von Marco Buser',references:['Nestlé','Zühlke','SBB']},
+    {name:'Daniel Schmidt',role:'Logistikleiter',description:'Daniel koordiniert alle logistischen Abläufe und sorgt dafür, dass jeder Umzug im Zeit- und Kostenrahmen bleibt.',email:'d.schmidt@reloplan.ch',image:'images/daniel-schmidt.jpg',image_alt:'Portrait von Daniel Schmidt',references:['Migros','Coop','Post']}
+  ]},
+  testimonials:{label:'Kundenstimmen',title_plain:'Was unsere Kunden',title_gradient:'sagen',title_suffix:'',items:[]},
+  faq:{label:'Häufige Fragen',title_plain:'Noch Fragen?',title_gradient:'wir haben Antworten',title_suffix:'',items:[]},
+  cta:{title:'Bereit für Ihren Umzug?',text:'Kontaktieren Sie uns für ein kostenloses Erstgespräch. Wir beraten Sie unverbindlich und erstellen einen individuellen Umzugsplan.',btn_text:'Jetzt anbieten',btn_href:'#contact'},
+  features:{label:'Unsere Leistungen',title_plain:'Was wir',title_gradient:'bieten',title_suffix:'',items:[]},
+  areas:{label:'Einsatzgebiete',title_plain:'Regional stark',title_gradient:'in der ganzen Schweiz',title_suffix:'',items:[{title:'Zürich & Umgebung',text:'Planung und Koordination für private und geschäftliche Umzüge im Grossraum Zürich.'},{title:'Deutschschweiz',text:'Zuverlässige Umzugsplanung für Basel, Bern, Luzern, St. Gallen und weitere Regionen.'},{title:'Schweizweite Projekte',text:'Komplexe Standortwechsel mit mehreren Etappen und klarer Terminführung.'}]},
+  checklist:{label:'Vorbereitung',title_plain:'Ihre',title_gradient:'Umzugs-Checkliste',title_suffix:'',items:[{title:'Fristen prüfen',text:'Kündigung, Übergabetermine und Dienstleister frühzeitig abstimmen.'},{title:'Inventar erfassen',text:'Möbel, Spezialobjekte und sensible Unterlagen sauber dokumentieren.'},{title:'Kommunikation planen',text:'Mitarbeitende, Verwaltung und Partner rechtzeitig informieren.'}]},
+  gallery:{label:'Einblicke',title_plain:'So sieht',title_gradient:'gute Planung aus',title_suffix:'',items:[{image:'images/team.jpg',title:'Persönliche Beratung',text:'Strukturierte Vorbereitung für einen ruhigen Ablauf.'}]},
+  packages:{label:'Pakete',title_plain:'Flexible',title_gradient:'Leistungspakete',title_suffix:'',items:[{title:'Basis',price:'Auf Anfrage',text:'Für klar abgegrenzte Umzüge mit schlanker Planung.',features:'Erstgespräch, Zeitplan, Dienstleisterkoordination'},{title:'Komplett',price:'Individuell',text:'Für Umzüge mit mehreren Beteiligten und hoher Koordination.',features:'Detailplanung, Umzugstag-Begleitung, Abschlusskontrolle'}]},
+  contact:{title_plain:'Nehmen Sie',title_gradient:'Kontakt auf',intro:'Wir freuen uns auf Ihre Anfrage und melden uns innerhalb von 24 Stunden bei Ihnen.',email:'info@reloplan.ch',phone_href:'+41441234567',phone_display:'+41 44 123 45 67',address:'Bahnhofstrasse 10, 8001 Zürich',linkedin:'reloplan-ag',map_src:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2701.946!2d8.5391!3d47.3769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47900a08cc0e6e41%3A0x2a5c0dcee6bcc7f9!2sBahnhofstrasse%2C%208001%20Zürich!5e0!3m2!1sde!2sch!4v1234567890'},
+  footer:{tagline:'Professionelles Umzugsmanagement',copyright:'© 2026 ReloPlan AG',credit:''},
+  design:{primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,section_spacing:'normal'},
+  structure:[]
+};
+
+function getDefaultStructure(){
+  return [
+    {type:'hero',active:true},{type:'about',active:true},{type:'process',active:true},
+    {type:'whoweare',active:true},{type:'team',active:true},{type:'contact',active:true}
+  ];
+}
+function getDefaultDesign(){
+  return {primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,section_spacing:'normal'};
+}
+
+var Cnt = {
+  _d: null,
+  get: function(){
+    if(!this._d){
+      try{ var s=localStorage.getItem(K.data); this._d=s?JSON.parse(s):JSON.parse(JSON.stringify(DEF)); }
+      catch(e){ this._d=JSON.parse(JSON.stringify(DEF)); }
+      if(!Array.isArray(this._d.structure) || !this._d.structure.length) this._d.structure=getDefaultStructure();
+      if(!this._d.design) this._d.design=getDefaultDesign();
+      if(!this._d.testimonials) this._d.testimonials={label:'Kundenstimmen',title_plain:'Was unsere Kunden',title_gradient:'sagen',title_suffix:'',items:[]};
+      if(!this._d.faq) this._d.faq={label:'Häufige Fragen',title_plain:'Noch Fragen?',title_gradient:'wir haben Antworten',title_suffix:'',items:[]};
+      if(!this._d.cta) this._d.cta={title:'Bereit für Ihren Umzug?',text:'Kontaktieren Sie uns für ein kostenloses Erstgespräch.',btn_text:'Jetzt anbieten',btn_href:'#contact'};
+      if(!this._d.features) this._d.features={label:'Unsere Leistungen',title_plain:'Was wir',title_gradient:'bieten',title_suffix:'',items:[]};
+      if(!this._d.areas) this._d.areas=JSON.parse(JSON.stringify(DEF.areas));
+      if(!this._d.checklist) this._d.checklist=JSON.parse(JSON.stringify(DEF.checklist));
+      if(!this._d.gallery) this._d.gallery=JSON.parse(JSON.stringify(DEF.gallery));
+      if(!this._d.packages) this._d.packages=JSON.parse(JSON.stringify(DEF.packages));
+    }
+    return this._d;
+  },
+  save: function(){ localStorage.setItem(K.data,JSON.stringify(this._d)); },
+  reset: function(){ this._d=null; localStorage.removeItem(K.data); },
+  gf: function(path){ var parts=path.split('.'), o=this.get(); for(var i=0;i<parts.length;i++){ if(o==null) return ''; o=o[parts[i]]; } return o==null?'':o; },
+  sf: function(path,val){ var parts=path.split('.'), o=this.get(); for(var i=0;i<parts.length-1;i++){ if(o[parts[i]]==null) o[parts[i]]=(isNaN(+parts[i+1])?{}:[]); o=o[parts[i]]; } o[parts[parts.length-1]]=val; }
+};
+
+function validateImportedContent(d){
+  if(!d || typeof d!=='object' || Array.isArray(d)) throw new Error('Ungültige Struktur');
+  if(Object.prototype.hasOwnProperty.call(d,'__proto__') || Object.prototype.hasOwnProperty.call(d,'constructor') || Object.prototype.hasOwnProperty.call(d,'prototype')) throw new Error('Ungültige Schlüssel');
+  if(d.structure !== undefined){
+    if(!Array.isArray(d.structure)) throw new Error('Ungültige Seitenstruktur');
+    d.structure=d.structure.filter(function(m){
+      return m && typeof m==='object' && MODULE_TYPES.indexOf(m.type)!==-1;
+    }).map(function(m){ return {type:m.type,active:m.active!==false}; });
+  }
+  MODULE_TYPES.forEach(function(type){
+    if(d[type] !== undefined && (!d[type] || typeof d[type] !== 'object' || Array.isArray(d[type]))) {
+      throw new Error('Ungültiges Modul: '+type);
+    }
+  });
+  if(d.nav && d.nav.links && !Array.isArray(d.nav.links)) throw new Error('Ungültige Navigation');
+  if(d.design && typeof d.design !== 'object') throw new Error('Ungültiges Design');
+  return d;
+}
+
+/* === UI TAB SWITCHING === */
+var TITLES = {struktur:'Seitenstruktur',design:'Design',seo:'SEO & Seite',hero:'Hero',about:'Über uns',process:'Prozess',whoweare:'Wer wir sind',team:'Team',testimonials:'Kundenrezensionen',faq:'FAQ',cta:'CTA-Banner',features:'Leistungen',areas:'Einsatzgebiete',checklist:'Checkliste',gallery:'Galerie',packages:'Pakete',contact:'Kontakt',footer:'Fusszeile',nav:'Navigation',settings:'Einstellungen'};
+
+var UI = {
+  tab: function(btn, id){
+    document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('[id^="tab-"]').forEach(function(p){ if(p.parentElement.classList.contains('content')) p.style.display='none'; });
+    var p=$i('tab-'+id); if(p) p.style.display='';
+    $i('topbarTitle').textContent=TITLES[id]||id;
+    if(id==='struktur') Struktur.render();
+    if(id==='design') Design.render();
+    if(id==='settings') this.renderSessionInfo();
+    // Render dynamic editors when switching tabs
+    if(['about','team','testimonials','faq','features','areas','checklist','gallery','packages','process','whoweare','nav'].indexOf(id)!==-1) this.renderEditor(id);
+  },
+  renderSessionInfo: function(){
+    var el=$i('session-info'); if(!el) return;
+    var exp=+localStorage.getItem(K.exp)||0;
+    var mins=Math.max(0,Math.round((exp-Date.now())/60000));
+    var h=Math.floor(mins/60), m=mins%60;
+    el.textContent='Sitzung aktiv. Läuft ab in: '+(h>0?h+' Std. ':'')+m+' Min.';
+  },
+  syncModuleTabs: function(){
+    var types=new Set((Cnt.get().structure||[]).map(function(m){ return m.type; }));
+    document.querySelectorAll('[data-module-tab]').forEach(function(btn){
+      btn.style.display=types.has(btn.dataset.moduleTab)?'flex':'none';
+    });
+    var active=document.querySelector('.nav-btn.active[data-module-tab]');
+    if(active && active.style.display==='none'){
+      var first=document.querySelector('.nav-btn[onclick*="struktur"]');
+      if(first) UI.tab(first,'struktur');
+    }
+  },
+  renderEditor: function(id){
+    var ed={about:AboutEd,process:ProcessEd,whoweare:WhoEd,team:TeamEd,testimonials:TestimonialsEd,faq:FaqEd,features:FeaturesEd,areas:AreasEd,checklist:ChecklistEd,gallery:GalleryEd,packages:PackagesEd,nav:NavEd}[id];
+    if(ed) ed.render();
+  },
+  loadFields: function(){
+    document.querySelectorAll('[data-field]').forEach(function(el){
+      var v=Cnt.gf(el.dataset.field); el.value=v==null?'':String(v);
+    });
+  },
+  collectFields: function(){
+    document.querySelectorAll('[data-field]').forEach(function(el){ Cnt.sf(el.dataset.field,el.value); });
+  }
+};
+
+/* === SEITENSTRUKTUR === */
+var Struktur = {
+  _locked: new Set([]),
+  render: function(){
+    var s=Cnt.get().structure||[], c=$i('struktur-list'); c.innerHTML='';
+    UI.syncModuleTabs();
+    var labels={hero:'Hero',about:'Über uns',process:'Prozess',whoweare:'Wer wir sind',team:'Team',testimonials:'Kundenrezensionen',faq:'FAQ',cta:'CTA-Banner',features:'Leistungen',areas:'Einsatzgebiete',checklist:'Checkliste',gallery:'Galerie',packages:'Pakete',contact:'Kontakt'};
+
+    s.forEach(function(item,idx){
+      var isLocked=Struktur._locked.has(item.type);
+      var d=document.createElement('div');
+      d.className='struct-item'+(item.active?' active':'')+(isLocked?' locked':'');
+      var btns='';
+      if(idx>0) btns+='<button class="btn btn-xs btn-secondary" onclick="Struktur.mv('+idx+','+(-1)+')">↑</button>';
+      if(idx<s.length-1) btns+='<button class="btn btn-xs btn-secondary" onclick="Struktur.mv('+idx+',1)">↓</button>';
+      var toggle='';
+      if(!isLocked){
+        toggle='<label class="struct-toggle"><input type="checkbox" class="struct-chk" '+(item.active?'checked':'')+' onchange="Struktur.toggle('+idx+',this.checked)"> Aktiv</label>';
+        toggle+='<div class="struct-btns"><button class="btn btn-xs btn-danger" onclick="Struktur.remove('+idx+')" title="Entfernen">×</button></div>';
+      } else {
+        toggle='<span style="font-size:.68rem;color:var(--muted);padding:0 .3rem">immer da</span>';
+      }
+      d.innerHTML='<div class="struct-btns">'+btns+'</div><span class="struct-name">'+esc(labels[item.type]||item.type)+'</span>'+toggle;
+      c.appendChild(d);
+    });
+
+    // Add panel
+    this.renderAddPanel();
+  },
+  renderAddPanel: function(){
+    var panel=$i('struktur-add-panel'), c=Cnt.get();
+    var activeTypes=new Set((c.structure||[]).map(function(s){return s.type;}));
+    var available=['hero','about','process','whoweare','team','testimonials','faq','cta','features','areas','checklist','gallery','packages','contact'].filter(function(t){return !activeTypes.has(t);});
+    var labels={hero:'Hero',about:'Über uns',process:'Prozess',whoweare:'Wer wir sind',team:'Team',testimonials:'Kundenrezensionen',faq:'FAQ',cta:'CTA-Banner',features:'Leistungen',areas:'Einsatzgebiete',checklist:'Checkliste',gallery:'Galerie',packages:'Pakete',contact:'Kontakt'};
+    if(!available.length){ panel.innerHTML='<p class="empty-hint">Alle verfügbaren Module sind bereits hinzugefügt.</p>'; return; }
+    var html='';
+    available.forEach(function(t){
+      html+='<button class="add-btn-item" type="button" data-add-module="'+esc(t)+'">+ '+labels[t]+'</button>';
+    });
+    panel.innerHTML=html;
+  },
+  toggleAdd: function(){
+    var panel=$i('struktur-add-panel'), btn=$i('struktur-add-btn');
+    if(!panel) return;
+    this.renderAddPanel();
+    var open=panel.classList.toggle('open');
+    if(btn) btn.setAttribute('aria-expanded',String(open));
+  },
+  addModule: function(type){
+    var c=Cnt.get(); if(!c.structure) c.structure=[];
+    c.structure.push({type:type,active:true});
+    Cnt.save(); this.render();
+    $i('struktur-add-panel').classList.remove('open');
+    $i('struktur-add-btn').setAttribute('aria-expanded','false');
+    toast(labels_add[type]||type+' hinzugefügt');
+  },
+  remove: function(idx){
+    var c=Cnt.get(); if(!c.structure) return;
+    if(this._locked.has(c.structure[idx].type)) return;
+    c.structure.splice(idx,1); Cnt.save(); this.render();
+  },
+  toggle: function(idx,val){ Cnt.get().structure[idx].active=val; Cnt.save(); this.render(); },
+  mv: function(idx,dir){
+    var c=Cnt.get(); if(!c.structure) return;
+    var j=idx+dir; if(j<0||j>=c.structure.length) return;
+    var tmp=c.structure[idx]; c.structure[idx]=c.structure[j]; c.structure[j]=tmp;
+    Cnt.save(); this.render();
+  }
+};
+var labels_add={hero:'Hero hinzugefügt',about:'Über uns hinzugefügt',process:'Prozess hinzugefügt',whoweare:'Wer wir sind hinzugefügt',team:'Team hinzugefügt',testimonials:'Kundenrezensionen hinzugefügt',faq:'FAQ hinzugefügt',cta:'CTA-Banner hinzugefügt',features:'Leistungen hinzugefügt',areas:'Einsatzgebiete hinzugefügt',checklist:'Checkliste hinzugefügt',gallery:'Galerie hinzugefügt',packages:'Pakete hinzugefügt',contact:'Kontakt hinzugefügt'};
+
+/* === DESIGN EDITOR === */
+var Design = {
+  render: function(){
+    var d=Cnt.get().design||getDefaultDesign();
+    $i('f-primary-color').value=d.primary_color||'#3b82f6';
+    $i('f-primary-hex').value=d.primary_color||'#3b82f6';
+    $i('swatch-primary').style.background=d.primary_color||'#3b82f6';
+    $i('f-accent-color').value=d.accent_color||'#f59e0b';
+    $i('f-accent-hex').value=d.accent_color||'#f59e0b';
+    $i('swatch-accent').style.background=d.accent_color||'#f59e0b';
+    $i('f-radius').value=d.border_radius||8;
+    $i('radius-val').textContent=(d.border_radius||8)+'px';
+
+    // Fonts
+    var fonts=['Inter','Playfair Display','Merriweather','Georgia'];
+    var fg=$i('font-grid'); fg.innerHTML='';
+    fonts.forEach(function(fn){
+      var sel=d.font_display===fn?' selected':'';
+      fg.innerHTML+='<div class="font-option'+sel+'" onclick="Design.selFont('+JSON.stringify(fn)+',this)" style="font-family:'+esc(fn)+', Georgia, serif">'+esc(fn)+'</div>';
+    });
+
+    // Spacing
+    var spacings=['kompakt','normal','grosszügig'];
+    var sg=$i('spacing-grid'); sg.innerHTML='';
+    spacings.forEach(function(sp){
+      var sel=d.section_spacing===sp?' selected':'';
+      sg.innerHTML+='<div class="spacing-option'+sel+'" onclick="Design.selSpacing('+JSON.stringify(sp)+',this)">'+sp+'<\/div>';
+    });
+  },
+  selFont: function(fn,el){
+    Cnt.get().design.font_display=fn; Cnt.save();
+    document.querySelectorAll('#font-grid .font-option').forEach(function(e){ e.classList.remove('selected'); });
+    el.classList.add('selected');
+  },
+  selSpacing: function(v,el){
+    Cnt.get().design.section_spacing=v; Cnt.save();
+    document.querySelectorAll('#spacing-grid .spacing-option').forEach(function(e){ e.classList.remove('selected'); });
+    el.classList.add('selected');
+  },
+  updateSwatch: function(which,val){
+    $i('f-'+which+'-hex').value=val;
+    $i('swatch-'+which).style.background=val;
+    Cnt.get().design[which+'_color']=val; Cnt.save();
+  },
+  hexInput: function(which,val){
+    if(/^#[0-9a-f]{6}$/i.test(val)){
+      $i('f-'+which+'-color').value=val;
+      $i('swatch-'+which).style.background=val;
+    }
+    Cnt.get().design[which+'_color']=val; Cnt.save();
+  },
+  radiusInput: function(val){
+    $i('radius-val').textContent=val+'px';
+    Cnt.get().design.border_radius=+val||0;
+    Cnt.save();
+  },
+  collect: function(){
+    var d=Cnt.get().design||(Cnt.get().design=getDefaultDesign());
+    d.primary_color=$i('f-primary-hex').value;
+    d.accent_color=$i('f-accent-hex').value;
+    d.border_radius=+$i('f-radius').value||0;
+  }
+};
+
+/* === ABOUT EDITOR === */
+var AboutEd = {
+  renderParas: function(){
+    var ps=Cnt.get().about.paragraphs||[], c=$i('about-paras'); c.innerHTML='';
+    ps.forEach(function(p,i){
+      var d=document.createElement('div'); d.className='list-card';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Absatz '+(i+1)+'</span><button class="btn btn-danger btn-icon" onclick="AboutEd.rmPara('+i+')">×</button></div><textarea class="form-input" data-ap="'+i+'" rows="3">'+esc(p)+'</textarea>';
+      c.appendChild(d);
+    });
+  },
+  addPara: function(){ var c=Cnt.get().about; c.paragraphs=c.paragraphs||[]; c.paragraphs.push(''); this.renderParas(); },
+  rmPara: function(i){ Cnt.get().about.paragraphs.splice(i,1); this.renderParas(); },
+  collectParas: function(){ Cnt.get().about.paragraphs=Array.prototype.slice.call(document.querySelectorAll('[data-ap]')).map(function(e){return e.value;}); },
+  renderStats: function(){
+    var ss=Cnt.get().about.stats||[], c=$i('about-stats'); c.innerHTML='';
+    ss.forEach(function(s,i){
+      var d=document.createElement('div'); d.className='list-card';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Statistik '+(i+1)+'</span><button class="btn btn-danger btn-icon" onclick="AboutEd.rmStat('+i+')">×</button></div>'+
+        '<div style="display:grid;grid-template-columns:90px 60px 1fr;gap:.6rem">'+
+        '<div><label class="form-label">Zahl</label><input class="form-input" type="number" data-as="'+i+'" data-ask="count" value="'+esc(String(s.count))+'"></div>'+
+        '<div><label class="form-label">Suffix</label><input class="form-input" type="text" data-as="'+i+'" data-ask="suffix" value="'+esc(s.suffix||'')+'" maxlength="5"></div>'+
+        '<div><label class="form-label">Bezeichnung</label><input class="form-input" type="text" data-as="'+i+'" data-ask="label" value="'+esc(s.label||'')+'"></div>'+
+        '</div>';
+      c.appendChild(d);
+    });
+  },
+  addStat: function(){ var c=Cnt.get().about; c.stats=c.stats||[]; c.stats.push({count:0,suffix:'',label:''}); this.renderStats(); },
+  rmStat: function(i){ Cnt.get().about.stats.splice(i,1); this.renderStats(); },
+  collectStats: function(){
+    var m={}; document.querySelectorAll('[data-as]').forEach(function(e){ var i=e.dataset.as; if(!m[i]) m[i]={}; m[i][e.dataset.ask]=e.dataset.ask==='count'?(+e.value||0):e.value; });
+    Cnt.get().about.stats=Object.values(m);
+  },
+  render: function(){ this.renderParas(); this.renderStats(); }
+};
+
+/* === PROCESS EDITOR === */
+var ProcessEd = {
+  render: function(){
+    var ss=Cnt.get().process.steps||[], c=$i('proc-steps'); c.innerHTML='';
+    ss.forEach(function(s,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns='';
+      if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="ProcessEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<ss.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="ProcessEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="ProcessEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Schritt '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Titel</label><input class="form-input" data-ps="'+i+'" data-psk="title" value="'+esc(s.title||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Beschreibung</label><textarea class="form-input" data-ps="'+i+'" data-psk="description" rows="2">'+esc(s.description||'')+'</textarea></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var p=Cnt.get().process; p.steps=p.steps||[]; p.steps.push({title:'',description:''}); this.render(); },
+  rm: function(i){ Cnt.get().process.steps.splice(i,1); this.render(); },
+  mv: function(i,d){ var ss=Cnt.get().process.steps, j=i+d; if(j<0||j>=ss.length) return; var t=ss[i]; ss[i]=ss[j]; ss[j]=t; this.render(); },
+  collect: function(){
+    var m={}; document.querySelectorAll('[data-ps]').forEach(function(e){ var i=e.dataset.ps; if(!m[i]) m[i]={}; m[i][e.dataset.psk]=e.value; });
+    Cnt.get().process.steps=Object.values(m);
+  }
+};
+
+/* === WHO EDITOR === */
+var WhoEd = {
+  render: function(){
+    var w=Cnt.get().whoweare||{};
+    if(w.image_src) $i('who-img').src=adminImgSrc(w.image_src);
+    var ps=w.paragraphs||[], c=$i('who-paras'); c.innerHTML='';
+    ps.forEach(function(p,i){
+      var d=document.createElement('div'); d.className='list-card';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Absatz '+(i+1)+'</span><button class="btn btn-danger btn-icon" onclick="WhoEd.rm('+i+')">×</button></div><textarea class="form-input" data-wp="'+i+'" rows="2">'+esc(p)+'</textarea>';
+      c.appendChild(d);
+    });
+  },
+  addPara: function(){ var w=Cnt.get().whoweare; w.paragraphs=w.paragraphs||[]; w.paragraphs.push(''); this.render(); },
+  rm: function(i){ Cnt.get().whoweare.paragraphs.splice(i,1); this.render(); },
+  collect: function(){ var w=Cnt.get().whoweare; w.paragraphs=Array.prototype.slice.call(document.querySelectorAll('[data-wp]')).map(function(e){return e.value;}); },
+  upload: function(input){
+    var f=input.files[0]; if(!f) return;
+    if(f.size>2097152){ toast('Bild zu gross (max. 2 MB)',false); return; }
+    var r=new FileReader();
+    r.onload=function(e){ $i('who-img').src=e.target.result; Cnt.get().whoweare.image_src=e.target.result; };
+    r.readAsDataURL(f);
+  }
+};
+
+/* === TEAM EDITOR === */
+var TeamEd = {
+  render: function(){
+    var ms=Cnt.get().team.members||[], c=$i('team-members'); c.innerHTML='';
+    if(!ms.length){ c.innerHTML='<p class="empty-hint">Noch keine Mitglieder.</p>'; return; }
+    ms.forEach(function(m,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns='';
+      if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="TeamEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<ms.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="TeamEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="TeamEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">'+esc(m.name)||'Neues Mitglied'+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:.85rem">'+
+        '<div class="img-wrap">'+
+        '<img id="tm-img-'+i+'" class="img-preview" src="'+esc(adminImgSrc(m.image||''))+'" alt="">'+
+        '<button class="img-overlay" onclick="document.getElementById(\'tm-file-'+i+'\').click()" title="Bild hochladen">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>'+
+        '<input type="file" id="tm-file-'+i+'" style="display:none" accept="image/*" onchange="TeamEd.uploadImg(this,'+i+')">'+
+        '</div>'+
+        '<div style="flex:1">'+
+        '<div class="form-group" style="margin-bottom:0"><label class="form-label">Name</label><input class="form-input" type="text" data-tm="'+i+'" data-tmk="name" value="'+esc(m.name||'')+'"></div>'+
+        '<div class="form-group" style="margin-bottom:0"><label class="form-label">Rolle</label><input class="form-input" type="text" data-tm="'+i+'" data-tmk="role" value="'+esc(m.role||'')+'"></div>'+
+        '<div class="form-group" style="margin-bottom:0"><label class="form-label">E-Mail</label><input class="form-input" type="email" data-tm="'+i+'" data-tmk="email" value="'+esc(m.email||'')+'"></div>'+
+        '</div></div>'+
+        '<div class="form-group"><label class="form-label">Beschreibung</label><textarea class="form-input" data-tm="'+i+'" data-tmk="description" rows="2">'+esc(m.description||'')+'</textarea></div>'+
+        '<div class="form-group"><label class="form-label">Referenzen (Enter oder Komma zum Hinzufügen)</label>'+
+        '<div class="tags-wrap" id="tw-'+i+'">'+
+        (m.references||[]).map(function(r,ri){ return '<span class="tag">'+esc(r)+'<button onclick="TeamEd.rmRef('+i+','+ri+')" title="Entfernen">×</button></span>'; }).join('')+
+        '<input class="tags-input" id="ti-'+i+'" placeholder="Referenz…" onkeydown="TeamEd.tagKey(event,'+i+')">'+
+        '</div></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){
+    var t=Cnt.get().team; t.members=t.members||[];
+    t.members.push({name:'',role:'',description:'',email:'',image:'',image_alt:'',references:[]});
+    this.render();
+    setTimeout(function(){ var cards=document.querySelectorAll('#team-members .list-card'); if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'}); },100);
+  },
+  rm: function(i){ Cnt.get().team.members.splice(i,1); this.render(); },
+  mv: function(i,d){ var ms=Cnt.get().team.members, j=i+d; if(j<0||j>=ms.length) return; var t=ms[i]; ms[i]=ms[j]; ms[j]=t; this.render(); },
+  tagKey: function(e,i){
+    if(e.key==='Enter'||e.key===','){ e.preventDefault(); var v=e.target.value.replace(',','').trim(); if(v){ this.addRef(i,v); e.target.value=''; } }
+  },
+  addRef: function(i,v){ var m=Cnt.get().team.members[i]; if(!m) return; m.references=m.references||[]; m.references.push(v); this.render(); setTimeout(function(){ var el=$i('ti-'+i); if(el) el.focus(); },50); },
+  rmRef: function(i,ri){ var m=Cnt.get().team.members[i]; if(!m) return; m.references.splice(ri,1); this.render(); },
+  collect: function(){
+    var ms=Cnt.get().team.members;
+    document.querySelectorAll('[data-tm]').forEach(function(el){
+      var i=+el.dataset.tm; if(!ms[i]) return; ms[i][el.dataset.tmk]=el.value;
+    });
+  },
+  uploadImg: function(input,i){
+    var f=input.files[0]; if(!f) return;
+    if(f.size>2097152){ toast('Bild zu gross (max. 2 MB)',false); return; }
+    var r=new FileReader();
+    r.onload=function(e){ var el=$i('tm-img-'+i); if(el) el.src=e.target.result; var m=Cnt.get().team.members[i]; if(m) m.image=e.target.result; };
+    r.readAsDataURL(f);
+  }
+};
+
+/* === TESTIMONIALS EDITOR === */
+var TestimonialsEd = {
+  render: function(){
+    var items=Cnt.get().testimonials.items||[], c=$i('testimonials-items'); c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Rezensionen. Fügen Sie eine hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns='';
+      if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="TestimonialsEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="TestimonialsEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="TestimonialsEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Rezension '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Text</label><textarea class="form-input" data-ti="'+i+'" data-tik="text" rows="3">'+esc(it.text||'')+'</textarea></div>'+
+        '<div class="form-row">'+
+        '<div class="form-group"><label class="form-label">Autor</label><input class="form-input" type="text" data-ti="'+i+'" data-tik="author" value="'+esc(it.author||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Firma</label><input class="form-input" type="text" data-ti="'+i+'" data-tik="company" value="'+esc(it.company||'')+'"></div>'+
+        '</div>'+
+        '<div class="form-row">'+
+        '<div class="form-group"><label class="form-label">Rating (1-5)</label><input class="form-input" type="number" min="1" max="5" data-ti="'+i+'" data-tik="rating" value="'+esc(String(it.rating||5))+'"></div>'+
+        '<div class="form-group"><label class="form-label">Icon</label><select class="form-input" data-ti="'+i+'" data-tik="icon"><option value="star" '+(it.icon==='star'?'selected':'')+'>Stern</option><option value="heart" '+(it.icon==='heart'?'selected':'')+'>Herz</option><option value="check" '+(it.icon==='check'?'selected':'')+'>Check</option><option value="shield" '+(it.icon==='shield'?'selected':'')+'>Schild</option></select></div>'+
+        '</div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().testimonials; c.items=c.items||[]; c.items.push({text:'',author:'',company:'',rating:5,icon:'star'}); this.render(); },
+  rm: function(i){ Cnt.get().testimonials.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().testimonials.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){
+    var items=Cnt.get().testimonials.items||[];
+    document.querySelectorAll('[data-ti]').forEach(function(el){
+      var i=+el.dataset.ti; if(!items[i]) return; items[i][el.dataset.tik]=el.dataset.tik==='rating'?(+el.value||5):el.value;
+    });
+  }
+};
+
+/* === FAQ EDITOR === */
+var FaqEd = {
+  render: function(){
+    var items=Cnt.get().faq.items||[], c=$i('faq-items'); c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Fragen. Fügen Sie eine hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns='';
+      if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="FaqEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="FaqEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="FaqEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Frage '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Frage</label><input class="form-input" data-fi="'+i+'" data-fik="question" value="'+esc(it.question||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Antwort</label><textarea class="form-input" data-fi="'+i+'" data-fik="answer" rows="3">'+esc(it.answer||'')+'</textarea></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().faq; c.items=c.items||[]; c.items.push({question:'',answer:''}); this.render(); },
+  rm: function(i){ Cnt.get().faq.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().faq.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){
+    var items=Cnt.get().faq.items||[];
+    document.querySelectorAll('[data-fi]').forEach(function(el){
+      var i=+el.dataset.fi; if(!items[i]) return; items[i][el.dataset.fik]=el.value;
+    });
+  }
+};
+
+/* === CTA EDITOR === */
+var CtaEd = {
+  render: function(){
+    var c=Cnt.get().cta||{};
+    $i('f-cta-title').value=c.title||'';
+    $i('f-cta-text').value=c.text||'';
+    $i('f-cta-btn').value=c.btn_text||'';
+    $i('f-cta-href').value=c.btn_href||'';
+  },
+  collect: function(){
+    var c=Cnt.get().cta||(Cnt.get().cta={});
+    c.title=$i('f-cta-title').value;
+    c.text=$i('f-cta-text').value;
+    c.btn_text=$i('f-cta-btn').value;
+    c.btn_href=$i('f-cta-href').value;
+  }
+};
+
+/* === FEATURES EDITOR === */
+var FeaturesEd = {
+  render: function(){
+    var items=Cnt.get().features.items||[], c=$i('features-items'); c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Leistungen. Fügen Sie eine hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns='';
+      if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="FeaturesEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="FeaturesEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="FeaturesEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Leistung '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Titel</label><input class="form-input" data-fe="'+i+'" data-fek="title" value="'+esc(it.title||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Text</label><textarea class="form-input" data-fe="'+i+'" data-fek="text" rows="2">'+esc(it.text||'')+'</textarea></div>'+
+        '<div class="form-group"><label class="form-label">Icon</label><select class="form-input" data-fe="'+i+'" data-fek="icon"><option value="shield" '+(it.icon==='shield'?'selected':'')+'>Schild</option><option value="clock" '+(it.icon==='clock'?'selected':'')+'>Uhr</option><option value="users" '+(it.icon==='users'?'selected':'')+'>Benutzer</option><option value="check" '+(it.icon==='check'?'selected':'')+'>Check</option><option value="star" '+(it.icon==='star'?'selected':'')+'>Stern</option><option value="truck" '+(it.icon==='truck'?'selected':'')+'>LKW</option><option value="map" '+(it.icon==='map'?'selected':'')+'>Map</option><option value="heart" '+(it.icon==='heart'?'selected':'')+'>Herz</option></select></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().features; c.items=c.items||[]; c.items.push({title:'',text:'',icon:'shield'}); this.render(); },
+  rm: function(i){ Cnt.get().features.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().features.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){
+    var items=Cnt.get().features.items||[];
+    document.querySelectorAll('[data-fe]').forEach(function(el){
+      var i=+el.dataset.fe; if(!items[i]) return; items[i][el.dataset.fek]=el.value;
+    });
+  }
+};
+
+/* === AREAS EDITOR === */
+var AreasEd = {
+  render: function(){
+    var items=Cnt.get().areas.items||[], c=$i('areas-items'); if(!c) return; c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Gebiete. Fügen Sie eines hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns=''; if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="AreasEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="AreasEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="AreasEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Gebiet '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Titel</label><input class="form-input" data-ar="'+i+'" data-ark="title" value="'+esc(it.title||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Text</label><textarea class="form-input" data-ar="'+i+'" data-ark="text" rows="2">'+esc(it.text||'')+'</textarea></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().areas; c.items=c.items||[]; c.items.push({title:'',text:''}); this.render(); },
+  rm: function(i){ Cnt.get().areas.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().areas.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){ var items=Cnt.get().areas.items||[]; document.querySelectorAll('[data-ar]').forEach(function(el){ var i=+el.dataset.ar; if(items[i]) items[i][el.dataset.ark]=el.value; }); }
+};
+
+/* === CHECKLIST EDITOR === */
+var ChecklistEd = {
+  render: function(){
+    var items=Cnt.get().checklist.items||[], c=$i('checklist-items'); if(!c) return; c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Punkte. Fügen Sie einen hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns=''; if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="ChecklistEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="ChecklistEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="ChecklistEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Punkt '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Titel</label><input class="form-input" data-cl="'+i+'" data-clk="title" value="'+esc(it.title||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Text</label><textarea class="form-input" data-cl="'+i+'" data-clk="text" rows="2">'+esc(it.text||'')+'</textarea></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().checklist; c.items=c.items||[]; c.items.push({title:'',text:''}); this.render(); },
+  rm: function(i){ Cnt.get().checklist.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().checklist.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){ var items=Cnt.get().checklist.items||[]; document.querySelectorAll('[data-cl]').forEach(function(el){ var i=+el.dataset.cl; if(items[i]) items[i][el.dataset.clk]=el.value; }); }
+};
+
+/* === GALLERY EDITOR === */
+var GalleryEd = {
+  render: function(){
+    var items=Cnt.get().gallery.items||[], c=$i('gallery-items'); if(!c) return; c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Bilder. Fügen Sie eines hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns=''; if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="GalleryEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="GalleryEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="GalleryEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Bild '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-group"><label class="form-label">Bildpfad oder URL</label><input class="form-input" data-ga="'+i+'" data-gak="image" value="'+esc(it.image||'')+'" placeholder="images/team.jpg"></div>'+
+        '<div class="form-row"><div class="form-group"><label class="form-label">Titel</label><input class="form-input" data-ga="'+i+'" data-gak="title" value="'+esc(it.title||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Text</label><input class="form-input" data-ga="'+i+'" data-gak="text" value="'+esc(it.text||'')+'"></div></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().gallery; c.items=c.items||[]; c.items.push({image:'',title:'',text:''}); this.render(); },
+  rm: function(i){ Cnt.get().gallery.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().gallery.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){ var items=Cnt.get().gallery.items||[]; document.querySelectorAll('[data-ga]').forEach(function(el){ var i=+el.dataset.ga; if(items[i]) items[i][el.dataset.gak]=el.value; }); }
+};
+
+/* === PACKAGES EDITOR === */
+var PackagesEd = {
+  render: function(){
+    var items=Cnt.get().packages.items||[], c=$i('packages-items'); if(!c) return; c.innerHTML='';
+    if(!items.length){ c.innerHTML='<p class="empty-hint">Noch keine Pakete. Fügen Sie eines hinzu.</p>'; return; }
+    items.forEach(function(it,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns=''; if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="PackagesEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<items.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="PackagesEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="PackagesEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Paket '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-row"><div class="form-group"><label class="form-label">Titel</label><input class="form-input" data-pa="'+i+'" data-pak="title" value="'+esc(it.title||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Preis</label><input class="form-input" data-pa="'+i+'" data-pak="price" value="'+esc(it.price||'')+'"></div></div>'+
+        '<div class="form-group"><label class="form-label">Text</label><textarea class="form-input" data-pa="'+i+'" data-pak="text" rows="2">'+esc(it.text||'')+'</textarea></div>'+
+        '<div class="form-group"><label class="form-label">Leistungen (kommagetrennt)</label><input class="form-input" data-pa="'+i+'" data-pak="features" value="'+esc(it.features||'')+'"></div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var c=Cnt.get().packages; c.items=c.items||[]; c.items.push({title:'',price:'',text:'',features:''}); this.render(); },
+  rm: function(i){ Cnt.get().packages.items.splice(i,1); this.render(); },
+  mv: function(i,d){ var items=Cnt.get().packages.items, j=i+d; if(j<0||j>=items.length) return; var t=items[i]; items[i]=items[j]; items[j]=t; this.render(); },
+  collect: function(){ var items=Cnt.get().packages.items||[]; document.querySelectorAll('[data-pa]').forEach(function(el){ var i=+el.dataset.pa; if(items[i]) items[i][el.dataset.pak]=el.value; }); }
+};
+
+/* === NAV EDITOR === */
+var NavEd = {
+  render: function(){
+    var ls=(Cnt.get().nav||{}).links||[], c=$i('nav-links'); c.innerHTML='';
+    if(!ls.length){ c.innerHTML='<p class="empty-hint">Keine Links. Fügen Sie welche hinzu.</p>'; return; }
+    ls.forEach(function(l,i){
+      var d=document.createElement('div'); d.className='list-card';
+      var btns='';
+      if(i>0) btns+='<button class="btn btn-secondary btn-icon" onclick="NavEd.mv('+i+','+(-1)+')">↑</button>';
+      if(i<ls.length-1) btns+='<button class="btn btn-secondary btn-icon" onclick="NavEd.mv('+i+',1)">↓</button>';
+      btns+='<button class="btn btn-danger btn-icon" onclick="NavEd.rm('+i+')">×</button>';
+      d.innerHTML='<div class="list-card-header"><span class="list-card-title">Link '+(i+1)+'</span><div class="list-card-actions">'+btns+'</div></div>'+
+        '<div class="form-row">'+
+        '<div class="form-group"><label class="form-label">Bezeichnung</label><input class="form-input" data-nl="'+i+'" data-nlk="label" value="'+esc(l.label||'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">Ziel</label><input class="form-input" data-nl="'+i+'" data-nlk="href" value="'+esc(l.href||'')+'" placeholder="#section"></div>'+
+        '</div>';
+      c.appendChild(d);
+    });
+  },
+  add: function(){ var n=Cnt.get().nav||(Cnt.get().nav={links:[]}); n.links=n.links||[]; n.links.push({label:'',href:'#'}); this.render(); },
+  rm: function(i){ Cnt.get().nav.links.splice(i,1); this.render(); },
+  mv: function(i,d){ var ls=Cnt.get().nav.links, j=i+d; if(j<0||j>=ls.length) return; var t=ls[i]; ls[i]=ls[j]; ls[j]=t; this.render(); },
+  collect: function(){
+    var ls=Cnt.get().nav.links||[];
+    document.querySelectorAll('[data-nl]').forEach(function(el){ var i=+el.dataset.nl; if(!ls[i]) return; ls[i][el.dataset.nlk]=el.value; });
+  }
+};
+
+/* === SETTINGS === */
+var Settings = {
+  exportJSON: function(){
+    App.collectAll();
+    var b=new Blob([JSON.stringify(Cnt.get(),null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='reloplan-content.json'; a.click(); URL.revokeObjectURL(a.href);
+    toast('JSON exportiert');
+  },
+  exportHTML: function(){
+    App.collectAll();
+    try{
+      var p=Promise.resolve(fetch('../index.html'));
+      p.then(function(resp){ if(!resp.ok) throw new Error('index.html nicht erreichbar'); return resp.text(); }).then(function(html){
+        var rawJSON=JSON.stringify(Cnt.get());
+        var lit=JSON.stringify(rawJSON).replace(/</g,'\\u003C').replace(/>/g,'\\u003E').replace(/&/g,'\\u0026');
+        var scr='<script>(function(){try{localStorage.setItem(\'rp_site_content\','+lit+');}catch(e){}}());<\/script>';
+        html=html.replace('</head>',scr+'\n</head>');
+        var b=new Blob([html],{type:'text/html'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='index-export.html'; a.click(); URL.revokeObjectURL(a.href);
+        toast('HTML exportiert');
+      }).catch(function(e){ toast('HTML-Export fehlgeschlagen: '+e.message,false); });
+    }catch(e){ toast('HTML-Export fehlgeschlagen: '+e.message,false); }
+  },
+  importJSON: function(input){
+    var f=input.files[0]; if(!f) return;
+    if(f.size>IMPORT_MAX_BYTES){ toast('JSON-Datei ist zu gross',false); input.value=''; return; }
+    var r=new FileReader();
+    r.onload=function(e){ try{ var d=validateImportedContent(JSON.parse(e.target.result)); Cnt._d=d; Cnt.save(); App.renderAll(); toast('Inhalte importiert'); }catch(err){ toast('Ungültige JSON-Datei: '+err.message,false); } };
+    r.readAsText(f); input.value='';
+  },
+  resetContent: function(){ if(!confirm('Alle Inhalte zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden.')) return; Cnt.reset(); App.renderAll(); toast('Inhalte zurückgesetzt'); },
+  changePassword: function(){ if(!confirm('Passwort zurücksetzen? Sie werden abgemeldet.')) return; localStorage.removeItem(K.hash); localStorage.removeItem(K.salt); localStorage.removeItem(K.iter); Auth.endSession(); App.init(); }
+};
+
+/* === APP === */
+var App = {
+  init: function(){
+    $i('adminPanel').style.display='none'; $i('authScreen').style.display='';
+    if(!Auth.configured()) Auth.showSetup();
+    else if(Auth.sessionOk()) this.enter();
+    else Auth.showLogin();
+  },
+  enter: function(){
+    $i('authScreen').style.display='none'; $i('adminPanel').style.display='flex';
+    this.renderAll();
+    document.addEventListener('keydown',function(e){ if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); App.save(); } });
+  },
+  renderAll: function(){
+    UI.loadFields();
+    AboutEd.renderParas(); AboutEd.renderStats();
+    ProcessEd.render(); WhoEd.render(); TeamEd.render(); NavEd.render();
+    TestimonialsEd.render(); FaqEd.render(); CtaEd.render(); FeaturesEd.render();
+    AreasEd.render(); ChecklistEd.render(); GalleryEd.render(); PackagesEd.render();
+    Struktur.render(); Design.render();
+    UI.syncModuleTabs();
+  },
+  collectAll: function(){
+    UI.collectFields();
+    Design.collect();
+    AboutEd.collectParas(); AboutEd.collectStats();
+    ProcessEd.collect(); WhoEd.collect(); TeamEd.collect(); NavEd.collect();
+    TestimonialsEd.collect(); FaqEd.collect(); CtaEd.collect(); FeaturesEd.collect();
+    AreasEd.collect(); ChecklistEd.collect(); GalleryEd.collect(); PackagesEd.collect();
+  },
+  save: function(){
+    this.collectAll(); Cnt.save();
+    Auth.startSession();
+    toast('Gespeichert! Änderungen sind auf der Website aktiv.');
+  }
+};
+
+document.addEventListener('DOMContentLoaded',function(){
+  $i('loginPwd')&&$i('loginPwd').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.login(); });
+  $i('setupPwd2')&&$i('setupPwd2').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.setup(); });
+  $i('struktur-add-btn')&&$i('struktur-add-btn').addEventListener('click',function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    Struktur.toggleAdd();
+  });
+  $i('struktur-add-panel')&&$i('struktur-add-panel').addEventListener('click',function(e){
+    var btn=e.target.closest('[data-add-module]');
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    Struktur.addModule(btn.dataset.addModule);
+  });
+  document.addEventListener('click',function(e){
+    var panel=$i('struktur-add-panel'), btn=$i('struktur-add-btn');
+    if(panel && btn && panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)){
+      panel.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+    }
+  });
+  App.init();
+});
+</script>
+</body>
+</html>
