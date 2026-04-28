@@ -65,6 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
 
+    // --- Subtle interactive polish ---
+    const tiltTargets = document.querySelectorAll('.stat-card, .team-card, .map-card, .feature-card, .testimonial-card');
+    if (!prefersReducedMotion && !isMobile) {
+        tiltTargets.forEach((card) => {
+            card.classList.add('interactive-tilt');
+            card.addEventListener('pointermove', (event) => {
+                const rect = card.getBoundingClientRect();
+                const x = (event.clientX - rect.left) / rect.width - 0.5;
+                const y = (event.clientY - rect.top) / rect.height - 0.5;
+                card.style.setProperty('--tilt-x', `${(-y * 5).toFixed(2)}deg`);
+                card.style.setProperty('--tilt-y', `${(x * 5).toFixed(2)}deg`);
+            });
+            card.addEventListener('pointerleave', () => {
+                card.style.setProperty('--tilt-x', '0deg');
+                card.style.setProperty('--tilt-y', '0deg');
+            });
+        });
+    }
+
 
 
     // --- Single consolidated scroll handler with rAF ---
@@ -75,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollProgressBar = document.getElementById('scrollProgress');
     const backToTopBtn = document.getElementById('backToTop');
     const timelineTrack = document.querySelector('.process-timeline');
+    const processSteps = document.querySelectorAll('.timeline-step');
 
     const navMap = {
         'hero': null,
@@ -122,6 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 heroBg.style.transform = `translateY(${scrollY * 0.3}px)`;
             }
 
+            if (heroBg && !prefersReducedMotion && window.innerWidth > 992) {
+                const driftX = Math.max(-18, Math.min(18, (window.innerWidth / 2 - (window.__rpMouseX || window.innerWidth / 2)) / 55));
+                const driftY = Math.max(-14, Math.min(14, (window.innerHeight / 2 - (window.__rpMouseY || window.innerHeight / 2)) / 70));
+                heroBg.style.setProperty('--hero-x', `${driftX}px`);
+                heroBg.style.setProperty('--hero-y', `${driftY}px`);
+            }
+
             // Timeline track fill animation
             if (timelineTrack && !prefersReducedMotion) {
                 const section = timelineTrack.closest('section');
@@ -131,6 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         (window.innerHeight - rect.top) / (rect.height + window.innerHeight * 0.3)
                     ));
                     timelineTrack.style.setProperty('--track-fill', Math.min(sectionVisible * 1.5, 1));
+
+                    if (processSteps.length) {
+                        const activeIndex = Math.min(processSteps.length - 1, Math.max(0, Math.floor(sectionVisible * processSteps.length)));
+                        processSteps.forEach((step, index) => {
+                            step.classList.toggle('is-current', index === activeIndex && rect.top < window.innerHeight * 0.72 && rect.bottom > window.innerHeight * 0.2);
+                        });
+                    }
                 }
             }
 
@@ -158,6 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    if (!prefersReducedMotion && !isMobile) {
+        window.addEventListener('pointermove', (event) => {
+            window.__rpMouseX = event.clientX;
+            window.__rpMouseY = event.clientY;
+        }, { passive: true });
+    }
     onScroll();
 
     // --- Back to Top click ---
