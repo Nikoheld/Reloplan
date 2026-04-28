@@ -148,7 +148,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
       <label class="form-label" for="setupPwd2">Passwort bestätigen</label>
       <input class="form-input" type="password" id="setupPwd2" placeholder="Passwort wiederholen" autocomplete="new-password">
     </div>
-    <button class="btn btn-primary btn-full" id="setupBtn" type="button">Passwort festlegen</button>
+    <button class="btn btn-primary btn-full" id="setupBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('setup', event)">Passwort festlegen</button>
   </div>
   <div id="loginForm" style="display:none">
     <div id="loginError" class="error-msg"></div>
@@ -156,15 +156,15 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
       <label class="form-label" for="loginPwd">Passwort</label>
       <input class="form-input" type="password" id="loginPwd" placeholder="Admin-Passwort" autocomplete="current-password">
     </div>
-    <button class="btn btn-primary btn-full" id="loginBtn" type="button">Anmelden</button>
+    <button class="btn btn-primary btn-full" id="loginBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('login', event)">Anmelden</button>
     <p style="text-align:center;margin-top:.9rem">
-      <button id="showResetBtn" type="button" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit">Passwort vergessen?</button>
+      <button id="showResetBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('showReset', event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit">Passwort vergessen?</button>
     </p>
   </div>
   <div id="resetForm" style="display:none">
     <p style="font-size:.875rem;color:var(--muted);margin-bottom:1.5rem;text-align:center">Das gespeicherte Passwort wird gelöscht. Danach können Sie ein neues festlegen.</p>
-    <button class="btn btn-danger btn-full" id="resetPwdBtn" type="button" style="margin-bottom:.75rem">Passwort zurücksetzen</button>
-    <button class="btn btn-secondary btn-full" id="cancelResetBtn" type="button">Abbrechen</button>
+    <button class="btn btn-danger btn-full" id="resetPwdBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('reset', event)" style="margin-bottom:.75rem">Passwort zurücksetzen</button>
+    <button class="btn btn-secondary btn-full" id="cancelResetBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('showLogin', event)">Abbrechen</button>
   </div>
 </div>
 </div>
@@ -889,6 +889,7 @@ async function apiJSON(url, options){
     return data || {};
   }catch(err){
     if(err && err.name === 'AbortError') throw new Error('API antwortet nicht. Pruefen Sie Cloudflare Pages Functions, RELOPLAN_KV und SESSION_SECRET.');
+    if(err && /failed to fetch|networkerror/i.test(err.message || '')) throw new Error('API nicht erreichbar. Pruefen Sie, ob Cloudflare Pages Functions deployed sind und RELOPLAN_KV sowie SESSION_SECRET in der richtigen Umgebung gesetzt sind.');
     throw err;
   }finally{
     clearTimeout(timer);
@@ -938,15 +939,15 @@ const Auth = {
   startSession(){ localStorage.setItem(K.exp, String(Date.now()+SESSION_MS)); },
   sessionOk(){ return API_AUTH; },
   endSession(){ API_AUTH=false; localStorage.removeItem(K.exp); },
-  showLogin(){ $i('setupForm').style.display=$i('resetForm').style.display='none'; $i('loginForm').style.display=''; $i('loginError').style.display='none'; $i('loginPwd').value=''; setTimeout(function(){ $i('loginPwd').focus(); },50); },
-  showSetup(){ $i('loginForm').style.display=$i('resetForm').style.display='none'; $i('setupForm').style.display=''; setTimeout(function(){ $i('setupPwd').focus(); },50); },
+  showLogin(){ $i('setupForm').style.display=$i('resetForm').style.display='none'; $i('loginForm').style.display=''; $i('loginError').style.display='none'; $i('loginPwd').value=''; var b=$i('loginBtn'); if(b){ b.disabled=false; b.textContent='Anmelden'; } setTimeout(function(){ $i('loginPwd').focus(); },50); },
+  showSetup(){ $i('loginForm').style.display=$i('resetForm').style.display='none'; $i('setupForm').style.display=''; $i('setupError').style.display='none'; var b=$i('setupBtn'); if(b){ b.disabled=false; b.textContent='Passwort festlegen'; } setTimeout(function(){ $i('setupPwd').focus(); },50); },
   showReset(){ $i('loginForm').style.display=$i('setupForm').style.display='none'; $i('resetForm').style.display=''; },
   async setup(){
     var p=$i('setupPwd').value, p2=$i('setupPwd2').value, e=$i('setupError');
     e.style.display='none';
-    if(p.length<12){ e.textContent='Mindestens 12 Zeichen erforderlich.'; e.style.display=''; return; }
-    if(!/[a-z]/.test(p)||!/[A-Z]/.test(p)||!/[0-9]/.test(p)){ e.textContent='Bitte Gross-/Kleinbuchstaben und Zahlen verwenden.'; e.style.display=''; return; }
-    if(p!==p2){ e.textContent='Passwörter stimmen nicht überein.'; e.style.display=''; return; }
+    if(p.length<12){ e.textContent='Mindestens 12 Zeichen erforderlich.'; e.style.display='block'; return; }
+    if(!/[a-z]/.test(p)||!/[A-Z]/.test(p)||!/[0-9]/.test(p)){ e.textContent='Bitte Gross-/Kleinbuchstaben und Zahlen verwenden.'; e.style.display='block'; return; }
+    if(p!==p2){ e.textContent='Passwörter stimmen nicht überein.'; e.style.display='block'; return; }
     var btn=$i('setupBtn'); btn.disabled=true; btn.textContent='Wird gespeichert…';
     try{
       await apiJSON('/api/auth/setup',{method:'POST',body:JSON.stringify({password:p,content:Cnt.get()})});
@@ -954,14 +955,14 @@ const Auth = {
       this.startSession();
       await Cnt.load();
       App.enter();
-    }catch(err){ e.textContent='Fehler: '+err.message; e.style.display=''; btn.disabled=false; btn.textContent='Passwort festlegen'; }
+    }catch(err){ e.textContent='Fehler: '+err.message; e.style.display='block'; btn.disabled=false; btn.textContent='Passwort festlegen'; }
   },
   async login(){
     var e=$i('loginError'); e.style.display='none';
     var lock=this.lockRemaining();
-    if(lock){ e.textContent='Zu viele Fehlversuche. Bitte in '+Math.ceil(lock/60000)+' Minuten erneut versuchen.'; e.style.display=''; return; }
+    if(lock){ e.textContent='Zu viele Fehlversuche. Bitte in '+Math.ceil(lock/60000)+' Minuten erneut versuchen.'; e.style.display='block'; return; }
     var p=$i('loginPwd').value;
-    if(!p){ e.textContent='Bitte Passwort eingeben.'; e.style.display=''; return; }
+    if(!p){ e.textContent='Bitte Passwort eingeben.'; e.style.display='block'; return; }
     var btn=$i('loginBtn'); btn.disabled=true; btn.textContent='Wird geprüft…';
     try{
       await apiJSON('/api/auth/login',{method:'POST',body:JSON.stringify({password:p})});
@@ -970,11 +971,42 @@ const Auth = {
       await Cnt.load();
       App.enter();
       btn.disabled=false; btn.textContent='Anmelden';
-    }catch(err){ e.textContent='Fehler: '+err.message; e.style.display=''; btn.disabled=false; btn.textContent='Anmelden'; }
+    }catch(err){ e.textContent='Fehler: '+err.message; e.style.display='block'; btn.disabled=false; btn.textContent='Anmelden'; }
   },
   async logout(){ try{ await apiJSON('/api/auth/logout',{method:'POST',body:'{}'}); }catch(e){} this.endSession(); App.init(); },
   doReset(){ alert('Passwort-Reset laeuft serverseitig ueber Cloudflare KV. Loeschen Sie dafuer den Key "auth" im KV-Namespace oder erstellen Sie einen neuen Namespace.'); }
 };
+window.Auth = Auth;
+window.rpAuthAction = function(action, event){
+  if(event){ event.preventDefault(); event.stopPropagation(); }
+  if(action === 'setup'){
+    var setupError = $i('setupError');
+    if(setupError){ setupError.textContent='Klick erkannt. Setup wird gestartet...'; setupError.style.display='block'; }
+    Auth.setup();
+  }
+  else if(action === 'login'){
+    var loginError = $i('loginError');
+    if(loginError){ loginError.textContent='Klick erkannt. Anmeldung wird gestartet...'; loginError.style.display='block'; }
+    Auth.login();
+  }
+  else if(action === 'showReset') Auth.showReset();
+  else if(action === 'showLogin') Auth.showLogin();
+  else if(action === 'reset') Auth.doReset();
+  return false;
+};
+function bindAuthButtons(){
+  var actions = [
+    ['setupBtn','setup'],
+    ['loginBtn','login'],
+    ['showResetBtn','showReset'],
+    ['resetPwdBtn','reset'],
+    ['cancelResetBtn','showLogin']
+  ];
+  actions.forEach(function(item){
+    var el = $i(item[0]);
+    if(el) el.onclick = function(event){ return window.rpAuthAction(item[1], event); };
+  });
+}
 
 /* === CONTENT STORE (localStorage) === */
 var DEF = {
@@ -1727,11 +1759,7 @@ var App = {
 };
 
 document.addEventListener('DOMContentLoaded',function(){
-  $i('setupBtn')&&$i('setupBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.setup(); });
-  $i('loginBtn')&&$i('loginBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.login(); });
-  $i('showResetBtn')&&$i('showResetBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.showReset(); });
-  $i('resetPwdBtn')&&$i('resetPwdBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.doReset(); });
-  $i('cancelResetBtn')&&$i('cancelResetBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.showLogin(); });
+  bindAuthButtons();
   $i('loginPwd')&&$i('loginPwd').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.login(); });
   $i('setupPwd2')&&$i('setupPwd2').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.setup(); });
   $i('struktur-add-btn')&&$i('struktur-add-btn').addEventListener('click',function(e){
@@ -1755,6 +1783,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   App.init();
 });
+if(document.readyState !== 'loading') bindAuthButtons();
 </script>
 </body>
 </html>
