@@ -47,7 +47,8 @@
         url = String(url || '').trim();
         try {
             var u = new URL(url);
-            if ((u.hostname === 'www.google.com' || u.hostname === 'maps.google.com') && u.pathname.indexOf('/maps/embed') === 0) return u.href;
+            if ((u.hostname === 'www.google.com' || u.hostname === 'maps.google.com') &&
+                (u.pathname.indexOf('/maps/embed') === 0 || (u.pathname === '/maps' && u.searchParams.get('output') === 'embed'))) return u.href;
         } catch (e) {}
         return '';
     }

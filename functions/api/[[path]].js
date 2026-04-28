@@ -2,6 +2,12 @@ const KDF_ITER = 310000;
 const SESSION_TTL_SECONDS = 60 * 60 * 2;
 const CONTENT_KEY = 'content';
 const AUTH_KEY = 'auth';
+const CURRENT_CONTACT = {
+  phone_display: '+41 44 777 29 29',
+  phone_href: '+41447772929',
+  address: 'Im Hanfland 7, 8902 Urdorf, Schweiz',
+  map_src: 'https://maps.google.com/maps?q=Im%20Hanfland%207%2C%208902%20Urdorf%2C%20Schweiz&output=embed'
+};
 
 const DEFAULT_CONTENT = {
   meta: {
@@ -17,7 +23,7 @@ const DEFAULT_CONTENT = {
   process: { label: 'Unser Prozess', title_plain: 'In 5 Schritten zu Ihrem', title_gradient: 'neuen Zuhause', steps: [], bar_title: '', bar_subtitle: '' },
   whoweare: { image_src: 'images/team.jpg', image_alt: 'ReloPlan Team', title_plain: 'Wer', title_gradient: 'wir sind', paragraphs: [], cta: '' },
   team: { label: 'Unser Team', title_plain: 'Die Menschen hinter', title_gradient: 'ReloPlan', members: [] },
-  contact: { title_plain: 'Nehmen Sie', title_gradient: 'Kontakt auf', intro: '', email: 'info@reloplan.ch', phone_display: '', phone_href: '', address: '', linkedin: 'reloplan-ag', map_src: '' },
+  contact: { title_plain: 'Nehmen Sie', title_gradient: 'Kontakt auf', intro: '', email: 'info@reloplan.ch', phone_display: CURRENT_CONTACT.phone_display, phone_href: CURRENT_CONTACT.phone_href, address: CURRENT_CONTACT.address, linkedin: 'reloplan-ag', map_src: CURRENT_CONTACT.map_src },
   testimonials: { label: 'Rezensionen', title_plain: 'Was unsere Kunden', title_gradient: 'sagen', items: [] },
   faq: { label: 'FAQ', title_plain: 'Noch Fragen?', title_gradient: 'wir haben Antworten', items: [] },
   cta: { title: 'Bereit fur Ihren Umzug?', text: 'Kontaktieren Sie uns fur ein kostenloses Erstgesprach.', btn_text: 'Jetzt anfragen', btn_href: '#contact' },
@@ -89,6 +95,34 @@ async function readJson(request) {
   return text ? JSON.parse(text) : {};
 }
 
+function migrateContent(content) {
+  if (!content || typeof content !== 'object') return { content, changed: false };
+  content.contact = content.contact && typeof content.contact === 'object' ? content.contact : {};
+  const oldAddress = ['Bahnhofstrasse 10, 8001 Zürich', 'Bahnhofstrasse 10, 8001 ZÃ¼rich', ''];
+  const oldPhoneDisplay = ['+41 44 123 45 67', ''];
+  const oldPhoneHref = ['+41441234567', ''];
+  let changed = false;
+
+  if (oldAddress.includes(content.contact.address || '') || /Bahnhofstrasse/i.test(content.contact.address || '')) {
+    content.contact.address = CURRENT_CONTACT.address;
+    changed = true;
+  }
+  if (oldPhoneDisplay.includes(content.contact.phone_display || '')) {
+    content.contact.phone_display = CURRENT_CONTACT.phone_display;
+    changed = true;
+  }
+  if (oldPhoneHref.includes(content.contact.phone_href || '')) {
+    content.contact.phone_href = CURRENT_CONTACT.phone_href;
+    changed = true;
+  }
+  if (!content.contact.map_src || /Bahnhofstrasse|8001|Z%C3%BCrich|Z%C3%83%C2%BCrich/i.test(content.contact.map_src)) {
+    content.contact.map_src = CURRENT_CONTACT.map_src;
+    changed = true;
+  }
+  if (changed) content._cmsSaved = true;
+  return { content, changed };
+}
+
 async function handle(request, env, params) {
   const kv = getKV(env);
   const rawPath = params.path || [];
@@ -97,7 +131,9 @@ async function handle(request, env, params) {
 
   if (path === '/content' && method === 'GET') {
     const stored = kv ? await kv.get(CONTENT_KEY, 'json') : null;
-    return json(stored || DEFAULT_CONTENT);
+    const migrated = migrateContent(stored || DEFAULT_CONTENT);
+    if (kv && stored && migrated.changed) await kv.put(CONTENT_KEY, JSON.stringify(migrated.content));
+    return json(migrated.content);
   }
 
   if (path === '/content' && method === 'PUT') {
