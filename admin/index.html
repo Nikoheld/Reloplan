@@ -148,7 +148,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
       <label class="form-label" for="setupPwd2">Passwort bestätigen</label>
       <input class="form-input" type="password" id="setupPwd2" placeholder="Passwort wiederholen" autocomplete="new-password">
     </div>
-    <button class="btn btn-primary btn-full" id="setupBtn" onclick="Auth.setup()">Passwort festlegen</button>
+    <button class="btn btn-primary btn-full" id="setupBtn" type="button">Passwort festlegen</button>
   </div>
   <div id="loginForm" style="display:none">
     <div id="loginError" class="error-msg"></div>
@@ -156,15 +156,15 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
       <label class="form-label" for="loginPwd">Passwort</label>
       <input class="form-input" type="password" id="loginPwd" placeholder="Admin-Passwort" autocomplete="current-password">
     </div>
-    <button class="btn btn-primary btn-full" id="loginBtn" onclick="Auth.login()">Anmelden</button>
+    <button class="btn btn-primary btn-full" id="loginBtn" type="button">Anmelden</button>
     <p style="text-align:center;margin-top:.9rem">
-      <button onclick="Auth.showReset()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit">Passwort vergessen?</button>
+      <button id="showResetBtn" type="button" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit">Passwort vergessen?</button>
     </p>
   </div>
   <div id="resetForm" style="display:none">
     <p style="font-size:.875rem;color:var(--muted);margin-bottom:1.5rem;text-align:center">Das gespeicherte Passwort wird gelöscht. Danach können Sie ein neues festlegen.</p>
-    <button class="btn btn-danger btn-full" onclick="Auth.doReset()" style="margin-bottom:.75rem">Passwort zurücksetzen</button>
-    <button class="btn btn-secondary btn-full" onclick="Auth.showLogin()">Abbrechen</button>
+    <button class="btn btn-danger btn-full" id="resetPwdBtn" type="button" style="margin-bottom:.75rem">Passwort zurücksetzen</button>
+    <button class="btn btn-secondary btn-full" id="cancelResetBtn" type="button">Abbrechen</button>
   </div>
 </div>
 </div>
@@ -874,14 +874,25 @@ const MODULE_TYPES = ['hero','about','process','whoweare','team','testimonials',
 var API_AUTH = false;
 
 async function apiJSON(url, options){
-  var resp = await fetch(url, Object.assign({
-    credentials:'same-origin',
-    headers:{'content-type':'application/json'}
-  }, options || {}));
-  var data = null;
-  try { data = await resp.json(); } catch(e) {}
-  if(!resp.ok) throw new Error((data && data.error) || ('HTTP '+resp.status));
-  return data || {};
+  var controller = new AbortController();
+  var timer = setTimeout(function(){ controller.abort(); }, 15000);
+  try{
+    var base = {
+      credentials:'same-origin',
+      headers:{'accept':'application/json','content-type':'application/json'},
+      signal: controller.signal
+    };
+    var resp = await fetch(url, Object.assign(base, options || {}));
+    var data = null;
+    try { data = await resp.json(); } catch(e) {}
+    if(!resp.ok) throw new Error((data && data.error) || ('HTTP '+resp.status));
+    return data || {};
+  }catch(err){
+    if(err && err.name === 'AbortError') throw new Error('API antwortet nicht. Pruefen Sie Cloudflare Pages Functions, RELOPLAN_KV und SESSION_SECRET.');
+    throw err;
+  }finally{
+    clearTimeout(timer);
+  }
 }
 
 /* ---- Helpers ---- */
@@ -1716,6 +1727,11 @@ var App = {
 };
 
 document.addEventListener('DOMContentLoaded',function(){
+  $i('setupBtn')&&$i('setupBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.setup(); });
+  $i('loginBtn')&&$i('loginBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.login(); });
+  $i('showResetBtn')&&$i('showResetBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.showReset(); });
+  $i('resetPwdBtn')&&$i('resetPwdBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.doReset(); });
+  $i('cancelResetBtn')&&$i('cancelResetBtn').addEventListener('click',function(e){ e.preventDefault(); Auth.showLogin(); });
   $i('loginPwd')&&$i('loginPwd').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.login(); });
   $i('setupPwd2')&&$i('setupPwd2').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.setup(); });
   $i('struktur-add-btn')&&$i('struktur-add-btn').addEventListener('click',function(e){
