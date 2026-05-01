@@ -1,4 +1,4 @@
-const KDF_ITER = 310000;
+const KDF_ITER = 100000;
 const SESSION_TTL_SECONDS = 60 * 60 * 2;
 const CONTENT_KEY = 'content';
 const AUTH_KEY = 'auth';
