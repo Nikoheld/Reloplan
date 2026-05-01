@@ -12,11 +12,16 @@ const CURRENT_CONTACT = {
 const DEFAULT_CONTENT = {
   meta: {
     title: 'ReloPlan AG - Professionelles Umzugsmanagement',
-    description: 'ReloPlan AG - Wir planen und steuern deinen Umzug. Von der Konzeption bis zur erfolgreichen Umsetzung.'
+    description: 'ReloPlan AG - Wir planen und steuern deinen Umzug. Von der Konzeption bis zur erfolgreichen Umsetzung.',
+    og_title: '',
+    og_description: '',
+    og_image: '',
+    canonical: '',
+    robots: ''
   },
-  design: { primary_color: '#3b82f6', accent_color: '#f59e0b', font_display: 'Inter', border_radius: 8, section_spacing: 'normal' },
+  design: { primary_color: '#3b82f6', accent_color: '#f59e0b', font_display: 'Inter', border_radius: 8, section_spacing: 'normal', preset: 'modern', hero_bg_style: 'gradient', hero_bg_image: '', hero_overlay: 35, hero_pattern: 3, button_style: 'pill', button_fill: 'light', layout_width: 'full', heading_scale: 100, body_scale: 100, animations: 'full', hover_effects: 'on' },
   nav: { links: [{ label: 'Uber uns', href: '#about' }, { label: 'Prozess', href: '#process' }, { label: 'Team', href: '#team' }, { label: 'Kontakt', href: '#contact' }] },
-  footer: { tagline: 'Professionelles Umzugsmanagement', copyright: '(c) 2026 ReloPlan AG', credit: '' },
+  footer: { tagline: 'Professionelles Umzugsmanagement', copyright: '(c) 2026 ReloPlan AG', credit: '', show_social: 'true', variant: 'dark', show_admin_link: 'hidden', imprint_label: '', imprint_href: '', privacy_label: '', privacy_href: '' },
   structure: [{ type: 'hero', active: true }, { type: 'about', active: true }, { type: 'process', active: true }, { type: 'whoweare', active: true }, { type: 'team', active: true }, { type: 'contact', active: true }],
   hero: { badge: 'Schweizer Umzugsspezialist', title_line1: 'Wir planen.', title_line2: 'Du bewegst.', subtitle: 'ReloPlan AG begleitet Sie von der ersten Idee bis zum letzten Karton.', btn_primary: 'Jetzt kontaktieren', btn_primary_href: '#contact', btn_outline: 'Unser Prozess', btn_outline_href: '#process' },
   about: { label: 'Uber uns', title_plain: 'Ihr Umzug', title_gradient: 'unsere Leidenschaft', title_suffix: '', paragraphs: [], stats: [] },

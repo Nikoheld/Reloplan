@@ -38,6 +38,15 @@
     --radius: 12px;
     --radius-lg: 20px;
     --radius-xl: 28px;
+    --container-max: none;
+    --button-radius: 999px;
+    --primary-button-bg: #ffffff;
+    --primary-button-color: var(--primary);
+    --heading-scale: 1;
+    --body-scale: 1;
+    --hero-background: linear-gradient(135deg, #0e2f44 0%, #1a5276 30%, #2471a3 60%, #2980b9 100%);
+    --hero-overlay-opacity: 0.35;
+    --hero-pattern-opacity: 0.03;
 
     --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -52,7 +61,7 @@
 
 html {
     scroll-behavior: smooth;
-    font-size: 16px;
+    font-size: calc(16px * var(--body-scale));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -60,6 +69,7 @@ html {
 body {
     font-family: var(--font-body);
     font-weight: 400;
+    font-size: calc(16px * var(--body-scale));
     line-height: 1.7;
     color: var(--gray-700);
     background: var(--white);
@@ -114,7 +124,7 @@ ol, ul {
 /* --- Utility Classes --- */
 .container {
     width: 100%;
-    max-width: none;
+    max-width: var(--container-max);
     margin: 0 auto;
     padding: 0 clamp(1.25rem, 4vw, 5rem);
 }
@@ -143,7 +153,7 @@ ol, ul {
 
 .section-title {
     font-family: var(--font-display);
-    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-size: calc(clamp(1.8rem, 4vw, 3rem) * var(--heading-scale));
     font-weight: 600;
     color: var(--gray-900);
     line-height: 1.2;
@@ -237,7 +247,7 @@ header {
 }
 
 .nav-inner {
-    max-width: none;
+    max-width: var(--container-max);
     margin: 0 auto;
     padding: 0 clamp(1.25rem, 4vw, 5rem);
     display: flex;
@@ -333,7 +343,7 @@ header {
     font-family: var(--font-body);
     font-size: 0.95rem;
     font-weight: 500;
-    border-radius: 50px;
+    border-radius: var(--button-radius);
     cursor: pointer;
     border: none;
     transition: var(--transition);
@@ -341,8 +351,8 @@ header {
 }
 
 .btn-primary {
-    background: #ffffff;
-    color: var(--primary);
+    background: var(--primary-button-bg);
+    color: var(--primary-button-color);
     box-shadow: var(--shadow-md);
 }
 
@@ -376,7 +386,7 @@ header {
 .hero-bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, #0e2f44 0%, #1a5276 30%, #2471a3 60%, #2980b9 100%);
+    background: var(--hero-background);
     z-index: 0;
     will-change: transform;
 }
@@ -396,6 +406,7 @@ header {
     position: absolute;
     inset: 0;
     background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: var(--hero-pattern-opacity);
 }
 
 .hero-content {
@@ -423,7 +434,7 @@ header {
 
 .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-size: calc(clamp(2.5rem, 7vw, 5rem) * var(--heading-scale));
     font-weight: 700;
     color: #ffffff;
     line-height: 1.1;
@@ -1189,6 +1200,7 @@ body::before {
     height: 36%;
     pointer-events: none;
     background: linear-gradient(to top, rgba(15, 23, 42, 0.22), transparent);
+    opacity: var(--hero-overlay-opacity);
     z-index: 0;
 }
 
@@ -2267,4 +2279,106 @@ body::before {
     .footer-credit {
         color: var(--gray-400);
     }
+}
+
+/* --- Admin-configurable presentation overrides --- */
+#about,
+#process,
+#who-we-are,
+#team,
+#contact,
+#testimonials,
+#faq,
+#features,
+#areas,
+#checklist,
+#gallery,
+#packages {
+    padding-top: var(--section-padding, clamp(4.5rem, 8vw, 8rem));
+    padding-bottom: var(--section-padding, clamp(4.5rem, 8vw, 8rem));
+}
+
+html[data-button-style="sharp"] .btn,
+html[data-button-style="sharp"] .cta-btn {
+    border-radius: 6px;
+}
+
+html[data-button-style="rounded"] .btn,
+html[data-button-style="rounded"] .cta-btn {
+    border-radius: 14px;
+}
+
+html[data-button-fill="brand"] .btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+
+html[data-button-fill="glass"] .btn-primary {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.28);
+    backdrop-filter: blur(14px);
+}
+
+html[data-animations="subtle"] .animate-in {
+    transform: translateY(16px) translate3d(0,0,0);
+    transition-duration: 0.45s;
+}
+
+html[data-animations="off"] *,
+html[data-hover-effects="off"] * {
+    animation: none !important;
+}
+
+html[data-animations="off"] .animate-in,
+html[data-animations="off"] .anim-scale,
+html[data-animations="off"] .anim-blur {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+}
+
+html[data-hover-effects="off"] .team-card:hover,
+html[data-hover-effects="off"] .stat-card:hover,
+html[data-hover-effects="off"] .contact-item:hover,
+html[data-hover-effects="off"] .map-card:hover,
+html[data-hover-effects="off"] .feature-card:hover,
+html[data-hover-effects="off"] .testimonial-card:hover,
+html[data-hover-effects="off"] .btn:hover,
+html[data-hover-effects="off"] .cta-btn:hover {
+    transform: none !important;
+    box-shadow: inherit;
+}
+
+footer[data-footer-variant="brand"] {
+    background: var(--primary-dark);
+}
+
+footer[data-footer-variant="brand"] .footer-social a:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+footer[data-footer-variant="minimal"] {
+    background: var(--white);
+    color: var(--gray-600);
+    border-top: 1px solid var(--gray-100);
+}
+
+footer[data-footer-variant="minimal"] .footer-logo {
+    filter: none;
+    opacity: 1;
+}
+
+footer[data-footer-variant="minimal"] .footer-inner {
+    border-bottom-color: var(--gray-100);
+}
+
+footer[data-footer-variant="minimal"] .footer-links a,
+footer[data-footer-variant="minimal"] .footer-social a svg,
+footer[data-footer-variant="minimal"] .footer-bottom,
+footer[data-footer-variant="minimal"] .footer-credit {
+    color: var(--gray-600);
+    stroke: var(--gray-600);
 }

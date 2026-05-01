@@ -282,6 +282,11 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
       <!-- DESIGN -->
       <div id="tab-design" style="display:none">
         <div class="section-card">
+          <div class="section-card-title">Design-Preset</div>
+          <div class="spacing-grid" id="preset-grid"></div>
+          <p class="form-hint" style="margin-top:.65rem">Presets setzen Farben, Buttons und Hero-Stimmung. Inhalte bleiben unverändert.</p>
+        </div>
+        <div class="section-card">
           <div class="section-card-title">Hauptfarbe</div>
           <div class="design-color-row">
             <div class="color-swatch" id="swatch-primary">
@@ -300,6 +305,55 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
           </div>
         </div>
         <div class="section-card">
+          <div class="section-card-title">Hero-Hintergrund</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-hero-bg-style">Stil</label>
+              <select class="form-input" id="f-hero-bg-style" onchange="Design.setValue('hero_bg_style',this.value)">
+                <option value="gradient">Gradient</option>
+                <option value="mesh">Premium Mesh</option>
+                <option value="solid">Ruhig / einfarbig</option>
+                <option value="image">Bild-URL</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-hero-bg-image">Bild-URL optional</label>
+              <input class="form-input" type="text" id="f-hero-bg-image" placeholder="images/hero.jpg oder https://..." oninput="Design.setValue('hero_bg_image',this.value)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-hero-overlay">Overlay-Stärke <span id="hero-overlay-val" style="float:right;color:var(--muted)">35%</span></label>
+              <input type="range" class="design-range" id="f-hero-overlay" min="0" max="85" value="35" oninput="Design.rangeInput('hero_overlay',this.value,'hero-overlay-val','%')">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-hero-pattern">Muster-Stärke <span id="hero-pattern-val" style="float:right;color:var(--muted)">3%</span></label>
+              <input type="range" class="design-range" id="f-hero-pattern" min="0" max="14" value="3" oninput="Design.rangeInput('hero_pattern',this.value,'hero-pattern-val','%')">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Button-Stil</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-button-style">Form</label>
+              <select class="form-input" id="f-button-style" onchange="Design.setValue('button_style',this.value)">
+                <option value="pill">Pill / rund</option>
+                <option value="rounded">Modern gerundet</option>
+                <option value="sharp">Kantig</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-button-fill">Primärbutton</label>
+              <select class="form-input" id="f-button-fill" onchange="Design.setValue('button_fill',this.value)">
+                <option value="light">Hell auf Hero</option>
+                <option value="brand">Markenfarbe</option>
+                <option value="glass">Glas-Effekt</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
           <div class="section-card-title">Schriftart (Überschriften)</div>
           <div class="design-font-grid" id="font-grid"></div>
         </div>
@@ -308,12 +362,49 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
           <div class="spacing-grid" id="spacing-grid"></div>
         </div>
         <div class="section-card">
+          <div class="section-card-title">Layoutbreite</div>
+          <div class="spacing-grid" id="width-grid"></div>
+        </div>
+        <div class="section-card">
           <div class="section-card-title">
             Border-Radius
             <span style="margin-left:auto;font-size:.8rem;color:var(--muted)" id="radius-val">8px</span>
           </div>
           <input type="range" class="design-range" id="f-radius" min="0" max="32" value="8" oninput="Design.radiusInput(this.value)">
           <p class="form-hint" style="margin-top:.5rem">Rundheit der Karten und Elemente</p>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Schriftgrößen</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-heading-scale">Überschriften <span id="heading-scale-val" style="float:right;color:var(--muted)">100%</span></label>
+              <input type="range" class="design-range" id="f-heading-scale" min="85" max="125" value="100" oninput="Design.rangeInput('heading_scale',this.value,'heading-scale-val','%')">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-body-scale">Fließtext <span id="body-scale-val" style="float:right;color:var(--muted)">100%</span></label>
+              <input type="range" class="design-range" id="f-body-scale" min="90" max="115" value="100" oninput="Design.rangeInput('body_scale',this.value,'body-scale-val','%')">
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-card-title">Animationen</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-animations">Scroll-Animationen</label>
+              <select class="form-input" id="f-animations" onchange="Design.setValue('animations',this.value)">
+                <option value="full">Voll</option>
+                <option value="subtle">Dezent</option>
+                <option value="off">Aus</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-hover-effects">Hover-Effekte</label>
+              <select class="form-input" id="f-hover-effects" onchange="Design.setValue('hover_effects',this.value)">
+                <option value="on">Aktiv</option>
+                <option value="off">Aus</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -338,6 +429,24 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
           <div class="form-group">
             <label class="form-label" for="f-og-desc">OG-Beschreibung <span style="font-weight:400">(leer = Meta-Beschreibung)</span></label>
             <textarea class="form-input" id="f-og-desc" data-field="meta.og_description" style="min-height:60px"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-og-image">OG-Bild URL</label>
+            <input class="form-input" type="text" id="f-og-image" data-field="meta.og_image" placeholder="images/preview.jpg oder https://...">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-canonical">Canonical URL</label>
+              <input class="form-input" type="url" id="f-canonical" data-field="meta.canonical" placeholder="https://reloplan.pages.dev/">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-robots">Robots</label>
+              <select class="form-input" id="f-robots" data-field="meta.robots">
+                <option value="">Standard</option>
+                <option value="index, follow">index, follow</option>
+                <option value="noindex, nofollow">noindex, nofollow</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -801,6 +910,52 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
             <label class="form-label" for="f-ft-cred">Credit-Text (rechts)</label>
             <input class="form-input" type="text" id="f-ft-cred" data-field="footer.credit">
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-ft-social">Social Icons</label>
+              <select class="form-input" id="f-ft-social" data-field="footer.show_social">
+                <option value="true">anzeigen</option>
+                <option value="false">ausblenden</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-ft-style">Footer-Stil</label>
+              <select class="form-input" id="f-ft-style" data-field="footer.variant">
+                <option value="dark">Dunkel</option>
+                <option value="brand">Markenfarbe</option>
+                <option value="minimal">Minimal</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-ft-admin-link">Admin-Link im Footer</label>
+            <select class="form-input" id="f-ft-admin-link" data-field="footer.show_admin_link">
+              <option value="hidden">versteckt</option>
+              <option value="visible">sichtbar</option>
+            </select>
+          </div>
+          <hr class="divider">
+          <div class="section-card-title" style="border-bottom:0;padding-bottom:0;margin-bottom:1rem">Rechtliche Links</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-ft-imprint-label">Impressum Label</label>
+              <input class="form-input" type="text" id="f-ft-imprint-label" data-field="footer.imprint_label" placeholder="Impressum">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-ft-imprint-href">Impressum Link</label>
+              <input class="form-input" type="text" id="f-ft-imprint-href" data-field="footer.imprint_href" placeholder="/impressum">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="f-ft-privacy-label">Datenschutz Label</label>
+              <input class="form-input" type="text" id="f-ft-privacy-label" data-field="footer.privacy_label" placeholder="Datenschutz">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="f-ft-privacy-href">Datenschutz Link</label>
+              <input class="form-input" type="text" id="f-ft-privacy-href" data-field="footer.privacy_href" placeholder="/datenschutz">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1033,7 +1188,7 @@ function bindAuthButtons(){
 
 /* === CONTENT STORE (localStorage) === */
 var DEF = {
-  meta:{title:'ReloPlan AG – Professionelles Umzugsmanagement',description:'ReloPlan AG – Wir planen und steuern deinen Umzug. Von der Konzeption bis zur erfolgreichen Umsetzung. 30+ Jahre Erfahrung, 3 Spezialisten, 100% Engagement.',og_title:'',og_description:''},
+  meta:{title:'ReloPlan AG – Professionelles Umzugsmanagement',description:'ReloPlan AG – Wir planen und steuern deinen Umzug. Von der Konzeption bis zur erfolgreichen Umsetzung. 30+ Jahre Erfahrung, 3 Spezialisten, 100% Engagement.',og_title:'',og_description:'',og_image:'',canonical:'',robots:''},
   nav:{links:[{href:'#about',label:'Über uns'},{href:'#process',label:'Prozess'},{href:'#team',label:'Team'},{href:'#contact',label:'Kontakt'}]},
   hero:{badge:'Schweizer Umzugsspezialist',title_line1:'Wir planen.',title_line2:'Du bewegst.',subtitle:'ReloPlan AG begleitet Sie von der ersten Idee bis zum letzten Karton – professionell, persönlich, präzise.',btn_primary:'Jetzt kontaktieren',btn_primary_href:'#contact',btn_outline:'Unser Prozess',btn_outline_href:'#process'},
   about:{label:'Über uns',title_plain:'Ihr Umzug —',title_gradient:'unsere Leidenschaft',title_suffix:'',paragraphs:[
@@ -1066,8 +1221,8 @@ var DEF = {
   gallery:{label:'Einblicke',title_plain:'So sieht',title_gradient:'gute Planung aus',title_suffix:'',items:[{image:'images/team.jpg',title:'Persönliche Beratung',text:'Strukturierte Vorbereitung für einen ruhigen Ablauf.'}]},
   packages:{label:'Pakete',title_plain:'Flexible',title_gradient:'Leistungspakete',title_suffix:'',items:[{title:'Basis',price:'Auf Anfrage',text:'Für klar abgegrenzte Umzüge mit schlanker Planung.',features:'Erstgespräch, Zeitplan, Dienstleisterkoordination'},{title:'Komplett',price:'Individuell',text:'Für Umzüge mit mehreren Beteiligten und hoher Koordination.',features:'Detailplanung, Umzugstag-Begleitung, Abschlusskontrolle'}]},
   contact:{title_plain:'Nehmen Sie',title_gradient:'Kontakt auf',intro:'Wir freuen uns auf Ihre Anfrage und melden uns innerhalb von 24 Stunden bei Ihnen.',email:'info@reloplan.ch',phone_href:'+41447772929',phone_display:'+41 44 777 29 29',address:'Im Hanfland 7, 8902 Urdorf, Schweiz',linkedin:'reloplan-ag',map_src:'https://maps.google.com/maps?q=Im%20Hanfland%207%2C%208902%20Urdorf%2C%20Schweiz&output=embed'},
-  footer:{tagline:'Professionelles Umzugsmanagement',copyright:'© 2026 ReloPlan AG',credit:''},
-  design:{primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,section_spacing:'normal'},
+  footer:{tagline:'Professionelles Umzugsmanagement',copyright:'© 2026 ReloPlan AG',credit:'',show_social:'true',variant:'dark',show_admin_link:'hidden',imprint_label:'',imprint_href:'',privacy_label:'',privacy_href:''},
+  design:{primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,section_spacing:'normal',preset:'modern',hero_bg_style:'gradient',hero_bg_image:'',hero_overlay:35,hero_pattern:3,button_style:'pill',button_fill:'light',layout_width:'full',heading_scale:100,body_scale:100,animations:'full',hover_effects:'on'},
   structure:[]
 };
 
@@ -1078,7 +1233,7 @@ function getDefaultStructure(){
   ];
 }
 function getDefaultDesign(){
-  return {primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,section_spacing:'normal'};
+  return {primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,section_spacing:'normal',preset:'modern',hero_bg_style:'gradient',hero_bg_image:'',hero_overlay:35,hero_pattern:3,button_style:'pill',button_fill:'light',layout_width:'full',heading_scale:100,body_scale:100,animations:'full',hover_effects:'on'};
 }
 
 var Cnt = {
@@ -1086,6 +1241,9 @@ var Cnt = {
   normalize: function(){
     if(!Array.isArray(this._d.structure) || !this._d.structure.length) this._d.structure=getDefaultStructure();
     if(!this._d.design) this._d.design=getDefaultDesign();
+    this._d.design=Object.assign(getDefaultDesign(),this._d.design||{});
+    this._d.meta=Object.assign({og_title:'',og_description:'',og_image:'',canonical:'',robots:''},this._d.meta||{});
+    this._d.footer=Object.assign({tagline:'Professionelles Umzugsmanagement',copyright:'© 2026 ReloPlan AG',credit:'',show_social:'true',variant:'dark',show_admin_link:'hidden',imprint_label:'',imprint_href:'',privacy_label:'',privacy_href:''},this._d.footer||{});
     if(!this._d.testimonials) this._d.testimonials={label:'Kundenstimmen',title_plain:'Was unsere Kunden',title_gradient:'sagen',title_suffix:'',items:[]};
     if(!this._d.faq) this._d.faq={label:'Häufige Fragen',title_plain:'Noch Fragen?',title_gradient:'wir haben Antworten',title_suffix:'',items:[]};
     if(!this._d.cta) this._d.cta={title:'Bereit für Ihren Umzug?',text:'Kontaktieren Sie uns für ein kostenloses Erstgespräch.',btn_text:'Jetzt anbieten',btn_href:'#contact'};
@@ -1272,8 +1430,16 @@ var labels_add={hero:'Hero hinzugefügt',about:'Über uns hinzugefügt',process:
 
 /* === DESIGN EDITOR === */
 var Design = {
+  presets:{
+    modern:{label:'Modern',primary_color:'#3b82f6',accent_color:'#f59e0b',font_display:'Inter',border_radius:8,button_style:'pill',button_fill:'light',hero_bg_style:'gradient'},
+    premium:{label:'Premium',primary_color:'#1a5276',accent_color:'#d4af37',font_display:'Playfair Display',border_radius:14,button_style:'pill',button_fill:'glass',hero_bg_style:'mesh'},
+    minimal:{label:'Minimal',primary_color:'#111827',accent_color:'#0ea5e9',font_display:'Georgia',border_radius:4,button_style:'rounded',button_fill:'brand',hero_bg_style:'solid'},
+    contrast:{label:'Kontrast',primary_color:'#0f172a',accent_color:'#22c55e',font_display:'Merriweather',border_radius:10,button_style:'sharp',button_fill:'brand',hero_bg_style:'gradient'}
+  },
   render: function(){
     var d=Cnt.get().design||getDefaultDesign();
+    d=Object.assign(getDefaultDesign(),d);
+    Cnt.get().design=d;
     $i('f-primary-color').value=d.primary_color||'#3b82f6';
     $i('f-primary-hex').value=d.primary_color||'#3b82f6';
     $i('swatch-primary').style.background=d.primary_color||'#3b82f6';
@@ -1282,6 +1448,26 @@ var Design = {
     $i('swatch-accent').style.background=d.accent_color||'#f59e0b';
     $i('f-radius').value=d.border_radius||8;
     $i('radius-val').textContent=(d.border_radius||8)+'px';
+    $i('f-hero-bg-style').value=d.hero_bg_style||'gradient';
+    $i('f-hero-bg-image').value=d.hero_bg_image||'';
+    $i('f-hero-overlay').value=d.hero_overlay==null?35:d.hero_overlay;
+    $i('hero-overlay-val').textContent=(d.hero_overlay==null?35:d.hero_overlay)+'%';
+    $i('f-hero-pattern').value=d.hero_pattern==null?3:d.hero_pattern;
+    $i('hero-pattern-val').textContent=(d.hero_pattern==null?3:d.hero_pattern)+'%';
+    $i('f-button-style').value=d.button_style||'pill';
+    $i('f-button-fill').value=d.button_fill||'light';
+    $i('f-heading-scale').value=d.heading_scale||100;
+    $i('heading-scale-val').textContent=(d.heading_scale||100)+'%';
+    $i('f-body-scale').value=d.body_scale||100;
+    $i('body-scale-val').textContent=(d.body_scale||100)+'%';
+    $i('f-animations').value=d.animations||'full';
+    $i('f-hover-effects').value=d.hover_effects||'on';
+
+    var pg=$i('preset-grid'); pg.innerHTML='';
+    Object.keys(this.presets).forEach(function(key){
+      var p=Design.presets[key], sel=(d.preset||'modern')===key?' selected':'';
+      pg.innerHTML+='<div class="spacing-option'+sel+'" onclick="Design.applyPreset('+JSON.stringify(key)+')">'+esc(p.label)+'<\/div>';
+    });
 
     // Fonts
     var fonts=['Inter','Playfair Display','Merriweather','Georgia'];
@@ -1298,6 +1484,20 @@ var Design = {
       var sel=d.section_spacing===sp?' selected':'';
       sg.innerHTML+='<div class="spacing-option'+sel+'" onclick="Design.selSpacing('+JSON.stringify(sp)+',this)">'+sp+'<\/div>';
     });
+
+    var widths=[['full','Volle Breite'],['wide','Breit'],['standard','Standard'],['narrow','Schmal']];
+    var wg=$i('width-grid'); wg.innerHTML='';
+    widths.forEach(function(w){
+      var sel=(d.layout_width||'full')===w[0]?' selected':'';
+      wg.innerHTML+='<div class="spacing-option'+sel+'" onclick="Design.selWidth('+JSON.stringify(w[0])+',this)">'+esc(w[1])+'<\/div>';
+    });
+  },
+  applyPreset:function(key){
+    var p=this.presets[key]; if(!p) return;
+    var d=Cnt.get().design||(Cnt.get().design=getDefaultDesign());
+    Object.assign(d,p,{preset:key});
+    this.render();
+    Cnt.save();
   },
   selFont: function(fn,el){
     Cnt.get().design.font_display=fn; Cnt.save();
@@ -1308,6 +1508,20 @@ var Design = {
     Cnt.get().design.section_spacing=v; Cnt.save();
     document.querySelectorAll('#spacing-grid .spacing-option').forEach(function(e){ e.classList.remove('selected'); });
     el.classList.add('selected');
+  },
+  selWidth: function(v,el){
+    Cnt.get().design.layout_width=v; Cnt.save();
+    document.querySelectorAll('#width-grid .spacing-option').forEach(function(e){ e.classList.remove('selected'); });
+    el.classList.add('selected');
+  },
+  setValue:function(key,val){
+    Cnt.get().design[key]=val;
+    Cnt.save();
+  },
+  rangeInput:function(key,val,labelId,suffix){
+    $i(labelId).textContent=val+(suffix||'');
+    Cnt.get().design[key]=+val||0;
+    Cnt.save();
   },
   updateSwatch: function(which,val){
     $i('f-'+which+'-hex').value=val;
@@ -1331,6 +1545,17 @@ var Design = {
     d.primary_color=$i('f-primary-hex').value;
     d.accent_color=$i('f-accent-hex').value;
     d.border_radius=+$i('f-radius').value||0;
+    d.hero_bg_style=$i('f-hero-bg-style').value;
+    d.hero_bg_image=$i('f-hero-bg-image').value;
+    d.hero_overlay=+$i('f-hero-overlay').value||0;
+    d.hero_pattern=+$i('f-hero-pattern').value||0;
+    d.button_style=$i('f-button-style').value;
+    d.button_fill=$i('f-button-fill').value;
+    d.layout_width=d.layout_width||'full';
+    d.heading_scale=+$i('f-heading-scale').value||100;
+    d.body_scale=+$i('f-body-scale').value||100;
+    d.animations=$i('f-animations').value;
+    d.hover_effects=$i('f-hover-effects').value;
   }
 };
 

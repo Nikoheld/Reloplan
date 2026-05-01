@@ -4,7 +4,9 @@
    ======================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        document.documentElement.getAttribute('data-animations') === 'off';
+    const hoverEffectsEnabled = document.documentElement.getAttribute('data-hover-effects') !== 'off';
     const isMobile = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     // --- Scroll Animations (Intersection Observer) ---
@@ -67,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Subtle interactive polish ---
     const tiltTargets = document.querySelectorAll('.stat-card, .team-card, .map-card, .feature-card, .testimonial-card');
-    if (!prefersReducedMotion && !isMobile) {
+    if (!prefersReducedMotion && !isMobile && hoverEffectsEnabled) {
         tiltTargets.forEach((card) => {
             card.classList.add('interactive-tilt');
             card.addEventListener('pointermove', (event) => {
