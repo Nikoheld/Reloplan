@@ -178,6 +178,13 @@ async function handle(request, env, params) {
     return json({ success: true }, 200, { 'set-cookie': 'rp_sid=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0' });
   }
 
+  if (path === '/auth/reset' && method === 'POST') {
+    if (!kv) return json({ error: 'KV binding RELOPLAN_KV fehlt' }, 500);
+    if (!await verifySession(request, env)) return json({ error: 'Nicht angemeldet' }, 401);
+    await kv.delete(AUTH_KEY);
+    return json({ success: true }, 200, { 'set-cookie': 'rp_sid=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0' });
+  }
+
   return json({ error: 'Nicht gefunden' }, 404);
 }
 

@@ -163,6 +163,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
   </div>
   <div id="resetForm" style="display:none">
     <p style="font-size:.875rem;color:var(--muted);margin-bottom:1.5rem;text-align:center">Das gespeicherte Passwort wird gelöscht. Danach können Sie ein neues festlegen.</p>
+    <div id="resetError" class="error-msg"></div>
     <button class="btn btn-danger btn-full" id="resetPwdBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('reset', event)" style="margin-bottom:.75rem">Passwort zurücksetzen</button>
     <button class="btn btn-secondary btn-full" id="cancelResetBtn" type="button" onclick="return window.rpAuthAction && window.rpAuthAction('showLogin', event)">Abbrechen</button>
   </div>
@@ -941,7 +942,7 @@ const Auth = {
   endSession(){ API_AUTH=false; localStorage.removeItem(K.exp); },
   showLogin(){ $i('setupForm').style.display=$i('resetForm').style.display='none'; $i('loginForm').style.display=''; $i('loginError').style.display='none'; $i('loginPwd').value=''; var b=$i('loginBtn'); if(b){ b.disabled=false; b.textContent='Anmelden'; } setTimeout(function(){ $i('loginPwd').focus(); },50); },
   showSetup(){ $i('loginForm').style.display=$i('resetForm').style.display='none'; $i('setupForm').style.display=''; $i('setupError').style.display='none'; var b=$i('setupBtn'); if(b){ b.disabled=false; b.textContent='Passwort festlegen'; } setTimeout(function(){ $i('setupPwd').focus(); },50); },
-  showReset(){ $i('loginForm').style.display=$i('setupForm').style.display='none'; $i('resetForm').style.display=''; },
+  showReset(){ $i('loginForm').style.display=$i('setupForm').style.display='none'; $i('resetForm').style.display=''; var e=$i('resetError'); if(e){ e.style.display='none'; e.textContent=''; } },
   async setup(){
     var p=$i('setupPwd').value, p2=$i('setupPwd2').value, e=$i('setupError');
     e.style.display='none';
@@ -974,7 +975,29 @@ const Auth = {
     }catch(err){ e.textContent='Fehler: '+err.message; e.style.display='block'; btn.disabled=false; btn.textContent='Anmelden'; }
   },
   async logout(){ try{ await apiJSON('/api/auth/logout',{method:'POST',body:'{}'}); }catch(e){} this.endSession(); App.init(); },
-  doReset(){ alert('Passwort-Reset laeuft serverseitig ueber Cloudflare KV. Loeschen Sie dafuer den Key "auth" im KV-Namespace oder erstellen Sie einen neuen Namespace.'); }
+  async resetPassword(){
+    var e=$i('resetError');
+    if(!API_AUTH){
+      if(e){
+        e.textContent='Aus Sicherheitsgründen kann das Passwort vor dem Login nicht automatisch gelöscht werden. Löschen Sie in Cloudflare KV den Key "auth" im Namespace RELOPLAN_KV und laden Sie /admin/ danach neu.';
+        e.style.display='block';
+      }
+      return false;
+    }
+    if(!confirm('Admin-Passwort wirklich zurücksetzen? Sie werden abgemeldet und müssen danach ein neues Passwort festlegen.')) return false;
+    try{
+      await apiJSON('/api/auth/reset',{method:'POST',body:'{}'});
+      this.endSession();
+      localStorage.removeItem(K.hash); localStorage.removeItem(K.salt); localStorage.removeItem(K.iter);
+      App.init();
+      return true;
+    }catch(err){
+      if(e){ e.textContent='Fehler: '+err.message; e.style.display='block'; }
+      else toast('Passwort-Reset fehlgeschlagen: '+err.message,false);
+      return false;
+    }
+  },
+  doReset(){ return this.resetPassword(); }
 };
 window.Auth = Auth;
 window.rpAuthAction = function(action, event){
@@ -1715,7 +1738,7 @@ var Settings = {
     r.readAsText(f); input.value='';
   },
   resetContent: function(){ if(!confirm('Alle Inhalte zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden.')) return; Cnt.reset(); App.renderAll(); toast('Inhalte zurückgesetzt'); },
-  changePassword: function(){ if(!confirm('Passwort zurücksetzen? Sie werden abgemeldet.')) return; localStorage.removeItem(K.hash); localStorage.removeItem(K.salt); localStorage.removeItem(K.iter); Auth.endSession(); App.init(); }
+  changePassword: async function(){ await Auth.resetPassword(); }
 };
 
 /* === APP === */
