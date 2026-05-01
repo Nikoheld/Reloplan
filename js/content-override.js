@@ -631,6 +631,16 @@
             applyPatches(content);
         }
     }
+    window.ReloPlanApplyContent = applyContent;
+    window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin) return;
+        var msg = event.data || {};
+        if (msg.type !== 'reloplan-preview' || !msg.content) return;
+        try {
+            applyContent(msg.content);
+            document.body.classList.add('rp-ready');
+        } catch (e) { /* ignore invalid preview payload */ }
+    });
 
     function hasRenderableContent(content) {
         if (!content || !content.structure || !content.structure.length) return false;

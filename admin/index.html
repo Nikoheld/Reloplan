@@ -55,11 +55,20 @@ a{color:var(--accent);text-decoration:none}
 .nav-btn.active{background:rgba(59,130,246,.12);color:var(--accent);font-weight:500}
 .nav-btn svg{flex-shrink:0;opacity:.65}
 .nav-btn.active svg{opacity:1}
-.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-width:0}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
 .topbar-left{font-size:1rem;font-weight:600;color:var(--text)}
 .topbar-right{display:flex;gap:.6rem;align-items:center}
-.content{padding:1.75rem;flex:1;max-width:860px}
+.admin-workspace{display:grid;grid-template-columns:minmax(520px,860px) minmax(360px,1fr);gap:1.25rem;padding:1.75rem;align-items:start}
+.content{padding:0;min-width:0}
+.live-preview{position:sticky;top:5.25rem;height:calc(100vh - 7rem);min-height:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column}
+.preview-head{height:48px;display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:0 .9rem;border-bottom:1px solid var(--border);background:var(--surface2)}
+.preview-title{font-size:.82rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:.45rem}
+.preview-title span{width:.5rem;height:.5rem;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+.preview-actions{display:flex;gap:.4rem;align-items:center}
+.preview-frame-wrap{flex:1;background:#fff}
+.preview-frame{width:100%;height:100%;border:0;background:#fff;display:block}
+@media(max-width:1180px){.admin-workspace{grid-template-columns:1fr}.live-preview{position:relative;top:0;height:620px;min-height:420px;order:-1}}
 
 /* ---- Cards ---- */
 .section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;margin-bottom:1.25rem}
@@ -262,6 +271,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
       </div>
     </div>
 
+    <div class="admin-workspace">
     <div class="content">
 
       <!-- SEITENSTRUKTUR -->
@@ -1006,6 +1016,19 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
         </div>
       </div>
 
+    </div>
+    <aside class="live-preview" aria-label="Live Vorschau">
+      <div class="preview-head">
+        <div class="preview-title"><span></span>Live Vorschau</div>
+        <div class="preview-actions">
+          <button class="btn btn-secondary btn-xs" type="button" onclick="Preview.reload()" title="Vorschau neu laden">↻</button>
+          <a class="btn btn-secondary btn-xs" href="../" target="_blank" title="In neuem Tab öffnen">↗</a>
+        </div>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe id="livePreviewFrame" class="preview-frame" src="../?admin-preview=1" title="Live Vorschau der Website" loading="eager"></iframe>
+      </div>
+    </aside>
     </div>
   </div>
 </div>
@@ -1966,6 +1989,46 @@ var Settings = {
   changePassword: async function(){ await Auth.resetPassword(); }
 };
 
+/* === LIVE PREVIEW === */
+var Preview = {
+  timer:null,
+  ready:false,
+  reload:function(){
+    var frame=$i('livePreviewFrame');
+    if(frame){ this.ready=false; frame.src='../?admin-preview=1&t=' + Date.now(); }
+  },
+  schedule:function(delay){
+    clearTimeout(this.timer);
+    var ms=delay==null?180:delay;
+    this.timer=setTimeout(function(){ Preview.render(); },ms);
+  },
+  render:function(){
+    var frame=$i('livePreviewFrame');
+    if(!frame || !frame.contentWindow) return;
+    try{
+      App.collectAll();
+      var data=JSON.parse(JSON.stringify(Cnt.get()));
+      data._cmsSaved=true;
+      frame.contentWindow.postMessage({type:'reloplan-preview',content:data},window.location.origin);
+    }catch(e){}
+  },
+  bind:function(){
+    var frame=$i('livePreviewFrame');
+    if(frame){
+      frame.addEventListener('load',function(){ Preview.ready=true; Preview.schedule(80); });
+    }
+    document.addEventListener('input',function(e){
+      if(e.target && e.target.closest && e.target.closest('.content')) Preview.schedule(220);
+    });
+    document.addEventListener('change',function(e){
+      if(e.target && e.target.closest && e.target.closest('.content')) Preview.schedule(120);
+    });
+    document.addEventListener('click',function(e){
+      if(e.target && e.target.closest && e.target.closest('.content')) Preview.schedule(260);
+    });
+  }
+};
+
 /* === APP === */
 var App = {
   init: async function(){
@@ -1989,6 +2052,7 @@ var App = {
     AreasEd.render(); ChecklistEd.render(); GalleryEd.render(); PackagesEd.render();
     Struktur.render(); Design.render();
     UI.syncModuleTabs();
+    Preview.schedule(120);
   },
   collectAll: function(){
     UI.collectFields();
@@ -2003,10 +2067,12 @@ var App = {
     var ok=await Cnt.save();
     Auth.startSession();
     toast(ok?'Gespeichert! Änderungen sind auf der Website aktiv.':'Lokal gespeichert. Cloudflare-Speicher nicht aktualisiert.',ok);
+    Preview.schedule(80);
   }
 };
 
 document.addEventListener('DOMContentLoaded',function(){
+  Preview.bind();
   bindAuthButtons();
   $i('loginPwd')&&$i('loginPwd').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.login(); });
   $i('setupPwd2')&&$i('setupPwd2').addEventListener('keydown',function(e){ if(e.key==='Enter') Auth.setup(); });
