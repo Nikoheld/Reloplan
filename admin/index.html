@@ -1520,48 +1520,52 @@ var Design = {
     var d=Cnt.get().design||(Cnt.get().design=getDefaultDesign());
     Object.assign(d,p,{preset:key});
     this.render();
-    Cnt.save();
+    this.changed();
   },
   selFont: function(fn,el){
-    Cnt.get().design.font_display=fn; Cnt.save();
+    Cnt.get().design.font_display=fn; this.changed();
     document.querySelectorAll('#font-grid .font-option').forEach(function(e){ e.classList.remove('selected'); });
     el.classList.add('selected');
   },
   selSpacing: function(v,el){
-    Cnt.get().design.section_spacing=v; Cnt.save();
+    Cnt.get().design.section_spacing=v; this.changed();
     document.querySelectorAll('#spacing-grid .spacing-option').forEach(function(e){ e.classList.remove('selected'); });
     el.classList.add('selected');
   },
   selWidth: function(v,el){
-    Cnt.get().design.layout_width=v; Cnt.save();
+    Cnt.get().design.layout_width=v; this.changed();
     document.querySelectorAll('#width-grid .spacing-option').forEach(function(e){ e.classList.remove('selected'); });
     el.classList.add('selected');
   },
   setValue:function(key,val){
     Cnt.get().design[key]=val;
-    Cnt.save();
+    this.changed();
   },
   rangeInput:function(key,val,labelId,suffix){
     $i(labelId).textContent=val+(suffix||'');
     Cnt.get().design[key]=+val||0;
-    Cnt.save();
+    this.changed();
   },
   updateSwatch: function(which,val){
     $i('f-'+which+'-hex').value=val;
     $i('swatch-'+which).style.background=val;
-    Cnt.get().design[which+'_color']=val; Cnt.save();
+    Cnt.get().design[which+'_color']=val; this.changed();
   },
   hexInput: function(which,val){
     if(/^#[0-9a-f]{6}$/i.test(val)){
       $i('f-'+which+'-color').value=val;
       $i('swatch-'+which).style.background=val;
     }
-    Cnt.get().design[which+'_color']=val; Cnt.save();
+    Cnt.get().design[which+'_color']=val; this.changed();
   },
   radiusInput: function(val){
     $i('radius-val').textContent=val+'px';
     Cnt.get().design.border_radius=+val||0;
+    this.changed();
+  },
+  changed:function(){
     Cnt.save();
+    Preview.schedule(40);
   },
   collect: function(){
     var d=Cnt.get().design||(Cnt.get().design=getDefaultDesign());
