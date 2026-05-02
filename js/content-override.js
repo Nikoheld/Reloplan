@@ -442,6 +442,14 @@
         });
     }
 
+    function revealRenderedContent() {
+        requestAnimationFrame(function () {
+            document.querySelectorAll('.animate-in:not(.visible)').forEach(function (el) {
+                el.classList.add('visible');
+            });
+        });
+    }
+
     /* ── Apply meta / nav / footer helpers ───────────────── */
     function applyMeta(meta) {
         if (!meta) return;
@@ -630,6 +638,7 @@
         } else {
             applyPatches(content);
         }
+        revealRenderedContent();
     }
     window.ReloPlanApplyContent = applyContent;
     window.addEventListener('message', function (event) {
