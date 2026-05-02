@@ -26,8 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
         rootMargin: '0px 0px 150px 0px'
     });
 
-    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
-
     // --- Animated Counter ---
     const counterObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -65,12 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, { threshold: 0.5 });
 
-    document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
-
-    // --- Subtle interactive polish ---
-    const tiltTargets = document.querySelectorAll('.stat-card, .team-card, .map-card, .feature-card, .testimonial-card');
-    if (!prefersReducedMotion && !isMobile && hoverEffectsEnabled) {
+    // --- Re-usable animation hydration for CMS-rendered content ---
+    const hydrateTilt = (root = document) => {
+        if (prefersReducedMotion || isMobile || !hoverEffectsEnabled) return;
+        const tiltTargets = root.querySelectorAll('.stat-card, .team-card, .map-card, .feature-card, .testimonial-card, .area-card, .package-card');
         tiltTargets.forEach((card) => {
+            if (card.dataset.rpTiltInit === '1') return;
+            card.dataset.rpTiltInit = '1';
             card.classList.add('interactive-tilt');
             card.addEventListener('pointermove', (event) => {
                 const rect = card.getBoundingClientRect();
@@ -84,19 +83,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.style.setProperty('--tilt-y', '0deg');
             });
         });
-    }
+    };
 
+    const hydrateAnimations = (root = document) => {
+        const animated = Array.from(root.querySelectorAll('.animate-in'));
+        const seenBySection = new Map();
+
+        animated.forEach((el) => {
+            if (el.dataset.rpAnimInit === '1') return;
+            el.dataset.rpAnimInit = '1';
+
+            const section = el.closest('section') || document.body;
+            const index = seenBySection.get(section) || 0;
+            seenBySection.set(section, index + 1);
+            el.style.setProperty('--reveal-index', Math.min(index, 8));
+
+            if (prefersReducedMotion) {
+                el.classList.add('visible');
+            } else {
+                observer.observe(el);
+            }
+        });
+
+        root.querySelectorAll('[data-count]').forEach((el) => {
+            if (el.dataset.rpCounterInit === '1') return;
+            el.dataset.rpCounterInit = '1';
+            if (prefersReducedMotion) {
+                el.textContent = (parseInt(el.dataset.count, 10) || 0) + (el.dataset.suffix || '');
+            } else {
+                counterObserver.observe(el);
+            }
+        });
+
+        hydrateTilt(root);
+        document.dispatchEvent(new CustomEvent('reloplan:animations-ready'));
+    };
+
+    window.ReloPlanHydrateAnimations = hydrateAnimations;
+    hydrateAnimations(document);
 
 
     // --- Single consolidated scroll handler with rAF ---
     const navbar = document.getElementById('navbar');
-    const heroBg = document.querySelector('.hero-bg');
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
+    let heroBg = document.querySelector('.hero-bg');
+    let sections = document.querySelectorAll('section[id]');
+    let navLinks = document.querySelectorAll('.nav-link');
     const scrollProgressBar = document.getElementById('scrollProgress');
     const backToTopBtn = document.getElementById('backToTop');
-    const timelineTrack = document.querySelector('.process-timeline');
-    const processSteps = document.querySelectorAll('.timeline-step');
+    let timelineTrack = document.querySelector('.process-timeline');
+    let processSteps = document.querySelectorAll('.timeline-step');
 
     const navMap = {
         'hero': null,
@@ -108,6 +143,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let ticking = false;
+
+    const refreshAnimatedRefs = () => {
+        heroBg = document.querySelector('.hero-bg');
+        sections = document.querySelectorAll('section[id]');
+        navLinks = document.querySelectorAll('.nav-link');
+        timelineTrack = document.querySelector('.process-timeline');
+        processSteps = document.querySelectorAll('.timeline-step');
+        onScroll();
+    };
 
     const onScroll = () => {
         if (ticking) return;
@@ -194,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('reloplan:animations-ready', refreshAnimatedRefs);
     if (!prefersReducedMotion && !isMobile) {
         window.addEventListener('pointermove', (event) => {
             window.__rpMouseX = event.clientX;

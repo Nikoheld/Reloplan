@@ -443,11 +443,21 @@
     }
 
     function revealRenderedContent() {
-        requestAnimationFrame(function () {
+        var hydrate = window.ReloPlanHydrateAnimations;
+        if (typeof hydrate === 'function') {
+            hydrate(document);
+            return;
+        }
+        window.setTimeout(function () {
+            var lateHydrate = window.ReloPlanHydrateAnimations;
+            if (typeof lateHydrate === 'function') {
+                lateHydrate(document);
+                return;
+            }
             document.querySelectorAll('.animate-in:not(.visible)').forEach(function (el) {
                 el.classList.add('visible');
             });
-        });
+        }, 120);
     }
 
     /* ── Apply meta / nav / footer helpers ───────────────── */

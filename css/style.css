@@ -174,6 +174,7 @@ ol, ul {
     transition: opacity 0.8s cubic-bezier(0.25, 1, 0.2, 1),
                 transform 0.8s cubic-bezier(0.25, 1, 0.2, 1),
                 filter 0.6s ease-out;
+    transition-delay: calc(var(--reveal-index, 0) * 70ms);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: opacity, transform;
@@ -1191,6 +1192,7 @@ body::before {
         linear-gradient(0deg, rgba(26, 82, 118, 0.025) 1px, transparent 1px);
     background-size: 72px 72px;
     mask-image: linear-gradient(to bottom, transparent 0, #000 28vh, #000 78vh, transparent 100%);
+    animation: backgroundGridDrift 28s linear infinite;
 }
 
 #hero::after {
@@ -1214,6 +1216,32 @@ body::before {
     transform: translate3d(var(--hero-x, 0px), var(--hero-y, 0px), 0);
 }
 
+.hero-bg::after {
+    animation: heroPatternSlide 34s linear infinite;
+    background-position: 0 0;
+}
+
+.hero-content::before {
+    content: '';
+    position: absolute;
+    inset: -7rem -5rem;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 42%, rgba(255,255,255,0.15), transparent 38%),
+        radial-gradient(circle at 28% 68%, rgba(52,152,219,0.16), transparent 32%);
+    filter: blur(8px);
+    opacity: 0.78;
+    animation: heroHaloFloat 9s ease-in-out infinite alternate;
+}
+
+.hero-title .gradient-text,
+.section-title .gradient-text,
+.stat-number {
+    background-size: 220% 220%;
+    animation: gradientFlow 8s ease-in-out infinite alternate;
+}
+
 .hero-badge {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 12px 32px rgba(0, 0, 0, 0.12);
 }
@@ -1228,6 +1256,26 @@ body::before {
     background: #8bd7ff;
     box-shadow: 0 0 0 5px rgba(139, 215, 255, 0.14);
     vertical-align: 0.08em;
+    animation: badgePulse 2.6s ease-in-out infinite;
+}
+
+.section-label {
+    position: relative;
+}
+
+.section-label::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    margin: 0.55rem auto 0;
+    border-radius: 999px;
+    background: var(--gradient);
+    transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.section-header.visible .section-label::after {
+    width: min(72px, 70%);
 }
 
 .btn,
@@ -1238,8 +1286,79 @@ body::before {
 .map-card,
 .feature-card,
 .testimonial-card,
+.area-card,
+.package-card,
 .faq-item {
     position: relative;
+}
+
+.stat-card,
+.team-card,
+.feature-card,
+.testimonial-card,
+.area-card,
+.package-card {
+    overflow: hidden;
+}
+
+.stat-card::before,
+.team-card::before,
+.feature-card::before,
+.testimonial-card::before,
+.area-card::before,
+.package-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255,255,255,0.85), transparent 42%, rgba(52,152,219,0.08));
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.stat-card > *,
+.team-card > *,
+.feature-card > *,
+.testimonial-card > *,
+.area-card > *,
+.package-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.stat-card.visible .stat-number {
+    animation: gradientFlow 8s ease-in-out infinite alternate, statSettle 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.timeline-step.visible .step-marker {
+    animation: stepSettle 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--reveal-index, 0) * 70ms);
+}
+
+.timeline-step.is-current .step-marker::after {
+    content: '';
+    position: absolute;
+    inset: -9px;
+    border-radius: 50%;
+    border: 1px solid rgba(52, 152, 219, 0.4);
+    animation: activeStepPulse 1.6s ease-out infinite;
+}
+
+.contact-item::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: var(--gradient);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.who-image img {
+    animation: imageFloat 8s ease-in-out infinite alternate;
 }
 
 .btn {
@@ -1276,6 +1395,25 @@ body::before {
     .team-email:hover svg,
     .footer-social a:hover {
         transform: translateY(-1px);
+    }
+
+    .stat-card:hover::before,
+    .team-card:hover::before,
+    .feature-card:hover::before,
+    .testimonial-card:hover::before,
+    .area-card:hover::before,
+    .package-card:hover::before {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .contact-item:hover::before {
+        transform: scaleY(1);
+    }
+
+    .step-icon:hover svg,
+    .contact-item:hover .contact-icon svg {
+        animation: iconWiggle 0.55s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .interactive-tilt {
@@ -1374,6 +1512,57 @@ body::before {
 @keyframes heroDrift {
     from { background-position: 0% 35%; }
     to { background-position: 100% 65%; }
+}
+
+@keyframes backgroundGridDrift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 72px 72px, -72px 72px; }
+}
+
+@keyframes heroPatternSlide {
+    from { background-position: 0 0; }
+    to { background-position: 120px 60px; }
+}
+
+@keyframes heroHaloFloat {
+    from { transform: translate3d(-8px, 8px, 0) scale(0.98); opacity: 0.58; }
+    to { transform: translate3d(10px, -10px, 0) scale(1.04); opacity: 0.82; }
+}
+
+@keyframes gradientFlow {
+    from { background-position: 0% 50%; }
+    to { background-position: 100% 50%; }
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 5px rgba(139, 215, 255, 0.14); }
+    50% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(139, 215, 255, 0.07); }
+}
+
+@keyframes statSettle {
+    0% { transform: translateY(8px) scale(0.96); filter: blur(3px); }
+    100% { transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes stepSettle {
+    0% { transform: translateY(10px) scale(0.84); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes activeStepPulse {
+    0% { opacity: 0.65; transform: scale(0.86); }
+    100% { opacity: 0; transform: scale(1.22); }
+}
+
+@keyframes imageFloat {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(0, -8px, 0) scale(1.012); }
+}
+
+@keyframes iconWiggle {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    35% { transform: rotate(-7deg) scale(1.08); }
+    70% { transform: rotate(6deg) scale(1.04); }
 }
 
 @keyframes panelSweep {
@@ -2326,7 +2515,11 @@ html[data-animations="subtle"] .animate-in {
 }
 
 html[data-animations="off"] *,
-html[data-hover-effects="off"] * {
+html[data-animations="off"] *::before,
+html[data-animations="off"] *::after,
+html[data-hover-effects="off"] *,
+html[data-hover-effects="off"] *::before,
+html[data-hover-effects="off"] *::after {
     animation: none !important;
 }
 
