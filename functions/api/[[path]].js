@@ -127,9 +127,9 @@ const DEFAULT_CONTENT = {
         "label": "Spezialisten"
       },
       {
-        "count": 2026,
-        "suffix": "",
-        "label": "Firmengründung"
+        "count": 100,
+        "suffix": "%",
+        "label": "Engagement"
       }
     ]
   },
@@ -257,7 +257,7 @@ const DEFAULT_CONTENT = {
     "title_gradient": "bieten",
     "items": []
   },
-  "_infoVersion": "reloplan-ch-2026-05-02"
+  "_infoVersion": "reloplan-ch-2026-05-02-engagement"
 };
 
 function json(body, status = 200, extraHeaders = {}) {
