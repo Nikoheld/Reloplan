@@ -10,72 +10,254 @@ const CURRENT_CONTACT = {
 };
 
 const DEFAULT_CONTENT = {
-  meta: {
-    title: 'ReloPlan AG - Professionelles Umzugsmanagement',
-    description: 'ReloPlan AG - Wir planen und steuern deinen Umzug. Von der Konzeption bis zur erfolgreichen Umsetzung. 30+ Jahre Erfahrung, 3 Spezialisten, 100% Engagement.',
-    og_title: '',
-    og_description: '',
-    og_image: '',
-    canonical: '',
-    robots: ''
+  "meta": {
+    "title": "ReloPlan AG",
+    "description": "Wir planen und steuern Ihren Umzug - von der Konzeption bis zur erfolgreichen Umsetzung!",
+    "og_title": "",
+    "og_description": "",
+    "og_image": "",
+    "canonical": "",
+    "robots": ""
   },
-  design: { primary_color: '#3b82f6', accent_color: '#f59e0b', font_display: 'Inter', border_radius: 8, section_spacing: 'normal', preset: 'modern', hero_bg_style: 'gradient', hero_bg_image: '', hero_overlay: 35, hero_pattern: 3, button_style: 'pill', button_fill: 'light', layout_width: 'full', heading_scale: 100, body_scale: 100, animations: 'full', hover_effects: 'on' },
-  nav: { links: [{ label: '\u00dcber uns', href: '#about' }, { label: 'Prozess', href: '#process' }, { label: 'Team', href: '#team' }, { label: 'Kontakt', href: '#contact' }] },
-  footer: { tagline: 'Professionelles Umzugsmanagement', copyright: '\u00a9 2026 ReloPlan AG', credit: '', show_social: 'true', variant: 'dark', show_admin_link: 'hidden', imprint_label: '', imprint_href: '', privacy_label: '', privacy_href: '' },
-  structure: [{ type: 'hero', active: true }, { type: 'about', active: true }, { type: 'process', active: true }, { type: 'whoweare', active: true }, { type: 'team', active: true }, { type: 'contact', active: true }],
-  hero: { badge: 'Schweizer Umzugsspezialist', title_line1: 'Wir planen.', title_line2: 'Du bewegst.', subtitle: 'ReloPlan AG begleitet Sie von der ersten Idee bis zum letzten Karton - professionell, pers\u00f6nlich, pr\u00e4zise.', btn_primary: 'Jetzt kontaktieren', btn_primary_href: '#contact', btn_outline: 'Unser Prozess', btn_outline_href: '#process' },
-  about: {
-    label: '\u00dcber uns',
-    title_plain: 'Ihr Umzug',
-    title_gradient: 'unsere Leidenschaft',
-    title_suffix: '',
-    paragraphs: [
-      'ReloPlan AG ist Ihr zuverl\u00e4ssiger Partner f\u00fcr jeden Umzug in der Schweiz. Mit \u00fcber 30 Jahren Erfahrung kennen wir jede Herausforderung - und wissen, wie wir sie meistern.',
-      'Wir \u00fcbernehmen die gesamte Planung und Koordination Ihres Umzugs: von der Bestandsaufnahme \u00fcber die Abstimmung mit Handwerkern und Transportunternehmen bis hin zur finalen \u00dcbergabe. Sie m\u00fcssen sich um nichts k\u00fcmmern.',
-      'Unsere drei Spezialisten bringen nicht nur Fachkenntnis mit, sondern auch das n\u00f6tige Einf\u00fchlungsverm\u00f6gen. Denn ein Umzug ist mehr als Logistik - er ist ein neues Kapitel in Ihrem Leben.'
-    ],
-    stats: [{ count: 30, suffix: '+', label: 'Jahre Erfahrung' }, { count: 3, suffix: '', label: 'Spezialisten' }, { count: 100, suffix: '%', label: 'Engagement' }]
+  "design": {
+    "primary_color": "#3b82f6",
+    "accent_color": "#f59e0b",
+    "font_display": "Inter",
+    "border_radius": 8,
+    "section_spacing": "normal",
+    "preset": "modern",
+    "hero_bg_style": "gradient",
+    "hero_bg_image": "",
+    "hero_overlay": 35,
+    "hero_pattern": 3,
+    "button_style": "pill",
+    "button_fill": "light",
+    "layout_width": "full",
+    "heading_scale": 100,
+    "body_scale": 100,
+    "animations": "full",
+    "hover_effects": "on"
   },
-  process: {
-    label: 'Unser Prozess',
-    title_plain: 'In 5 Schritten zu Ihrem',
-    title_gradient: 'neuen Zuhause',
-    steps: [
-      { title: 'Erstgespr\u00e4ch', description: 'Wir analysieren Ihre Bed\u00fcrfnisse und kl\u00e4ren alle Details f\u00fcr einen reibungslosen Start.' },
-      { title: 'Detailplanung', description: 'Wir erstellen einen pr\u00e4zisen Zeitplan mit Kostenrahmen und koordinieren alle Dienstleister.' },
-      { title: 'Koordination', description: 'Wir stimmen alle Beteiligten ab und behalten jederzeit den \u00dcberblick - Sie lehnen sich zur\u00fcck.' },
-      { title: 'Umzugstag', description: 'Wir begleiten Sie pers\u00f6nlich am grossen Tag und sorgen f\u00fcr einen p\u00fcnktlichen, sicheren Ablauf.' },
-      { title: 'Abschluss', description: 'Wir begleiten Sie bis alles sitzt und stehen auch nach dem Umzug f\u00fcr Fragen zur Verf\u00fcgung.' }
-    ],
-    bar_title: 'Kostenloses Erstgespr\u00e4ch',
-    bar_subtitle: 'Jetzt unverbindlich anfragen - wir melden uns innerhalb von 24 Stunden.'
-  },
-  whoweare: {
-    image_src: 'images/team.jpg',
-    image_alt: 'Das ReloPlan-Team bei der Arbeit',
-    title_plain: 'Wer',
-    title_gradient: 'wir sind',
-    paragraphs: [
-      'ReloPlan AG wurde gegr\u00fcndet, weil wir selbst erlebt haben, wie stressig ein Umzug sein kann - und wie viel einfacher er mit der richtigen Unterst\u00fctzung wird.',
-      'Wir arbeiten nicht mit Standardl\u00f6sungen. Jeder Umzug ist einzigartig - und bekommt von uns die individuelle Aufmerksamkeit, die er verdient.'
-    ],
-    cta: 'Bereit f\u00fcr Ihren stressfreien Umzug?'
-  },
-  team: {
-    label: 'Unser Team',
-    title_plain: 'Die Menschen hinter',
-    title_gradient: 'ReloPlan',
-    members: [
-      { name: 'Roger Schwendener', role: 'Gr\u00fcnder & CEO', description: 'Mit \u00fcber 30 Jahren Erfahrung in der Umzugsbranche steht Roger f\u00fcr Qualit\u00e4t und Zuverl\u00e4ssigkeit.', email: 'r.schwendener@reloplan.ch', image: 'images/roger-schwendener.jpg', image_alt: 'Portrait von Roger Schwendener', references: ['UBS', 'Swisscom', 'ABB'] },
-      { name: 'Marco Buser', role: 'Umzugsexperte', description: 'Marco ist unser Spezialist f\u00fcr komplexe Umzugsprojekte. Sein logisches Denken garantiert, dass kein Karton am falschen Ort landet.', email: 'm.buser@reloplan.ch', image: 'images/marco-buser.jpg', image_alt: 'Portrait von Marco Buser', references: ['Nestle', 'Z\u00fchlke', 'SBB'] },
-      { name: 'Daniel Schmidt', role: 'Logistikleiter', description: 'Daniel koordiniert alle logistischen Abl\u00e4ufe und sorgt daf\u00fcr, dass jeder Umzug im Zeit- und Kostenrahmen bleibt.', email: 'd.schmidt@reloplan.ch', image: 'images/daniel-schmidt.jpg', image_alt: 'Portrait von Daniel Schmidt', references: ['Migros', 'Coop', 'Post'] }
+  "nav": {
+    "links": [
+      {
+        "label": "Umzugsmanagement",
+        "href": "#about"
+      },
+      {
+        "label": "Prozess",
+        "href": "#process"
+      },
+      {
+        "label": "Team",
+        "href": "#team"
+      },
+      {
+        "label": "Kontakt",
+        "href": "#contact"
+      }
     ]
   },
-  contact: { title_plain: 'Nehmen Sie', title_gradient: 'Kontakt auf', intro: 'Wir freuen uns auf Ihre Anfrage und melden uns innerhalb von 24 Stunden bei Ihnen.', email: 'info@reloplan.ch', phone_display: CURRENT_CONTACT.phone_display, phone_href: CURRENT_CONTACT.phone_href, address: CURRENT_CONTACT.address, linkedin: 'reloplan-ag', map_src: CURRENT_CONTACT.map_src },
-  testimonials: { label: 'Rezensionen', title_plain: 'Was unsere Kunden', title_gradient: 'sagen', items: [] },
-  faq: { label: 'FAQ', title_plain: 'Noch Fragen?', title_gradient: 'wir haben Antworten', items: [] },
-  cta: { title: 'Bereit f\u00fcr Ihren Umzug?', text: 'Kontaktieren Sie uns f\u00fcr ein kostenloses Erstgespr\u00e4ch.', btn_text: 'Jetzt anfragen', btn_href: '#contact' },
-  features: { label: 'Unsere Leistungen', title_plain: 'Was wir', title_gradient: 'bieten', items: [] }
+  "footer": {
+    "tagline": "Professionelles Umzugsmanagement",
+    "copyright": "© 2026 Silvan Schmidt",
+    "credit": "",
+    "show_social": "true",
+    "variant": "dark",
+    "show_admin_link": "hidden",
+    "imprint_label": "",
+    "imprint_href": "",
+    "privacy_label": "",
+    "privacy_href": ""
+  },
+  "structure": [
+    {
+      "type": "hero",
+      "active": true
+    },
+    {
+      "type": "about",
+      "active": true
+    },
+    {
+      "type": "process",
+      "active": true
+    },
+    {
+      "type": "whoweare",
+      "active": true
+    },
+    {
+      "type": "team",
+      "active": true
+    },
+    {
+      "type": "contact",
+      "active": true
+    }
+  ],
+  "hero": {
+    "badge": "Schweizer Umzugsspezialist",
+    "title_line1": "Wir planen.",
+    "title_line2": "Du bewegst.",
+    "subtitle": "Wir planen und steuern Ihren Umzug - von der Konzeption bis zur erfolgreichen Umsetzung!",
+    "btn_primary": "Jetzt kontaktieren",
+    "btn_primary_href": "#contact",
+    "btn_outline": "Unser Prozess",
+    "btn_outline_href": "#process"
+  },
+  "about": {
+    "label": "Umzugsmanagement",
+    "title_plain": "Professionelles",
+    "title_gradient": "Umzugsmanagement",
+    "title_suffix": "",
+    "paragraphs": [
+      "Als dein Partner für professionelles Umzugsmanagement übernehmen wir die Regie von der strategischen Planung bis zur erfolgreichen Übergabe. Durch klare Kommunikation und die gezielte Koordination aller Beteiligten und Dienstleister stellen wir sicher, dass Mobiliar, Technik und Abläufe nahtlos ineinandergreifen.",
+      "Unser Ziel ist deine Entlastung: Während wir die Schnittstellen managen und Termine überwachen, konzentrierst du dich voll auf dein Tagesgeschäft. Auch in komplexen Phasen behalten wir den Überblick und garantieren Prozesssicherheit, indem wir Termine, Abhängigkeiten und Abläufe optimal aufeinander abstimmen."
+    ],
+    "stats": [
+      {
+        "count": 30,
+        "suffix": "+",
+        "label": "Jahre Erfahrung"
+      },
+      {
+        "count": 3,
+        "suffix": "",
+        "label": "Spezialisten"
+      },
+      {
+        "count": 2026,
+        "suffix": "",
+        "label": "Firmengründung"
+      }
+    ]
+  },
+  "process": {
+    "label": "Unser Prozess",
+    "title_plain": "In 5 Schritten zu Ihrem",
+    "title_gradient": "neuen Zuhause",
+    "steps": [
+      {
+        "title": "Erstgespräch",
+        "description": "Wir analysieren Ihre Bedürfnisse und klären alle Details für einen reibungslosen Start."
+      },
+      {
+        "title": "Detailplanung",
+        "description": "Wir erstellen einen präzisen Zeitplan mit Kostenrahmen und koordinieren alle Dienstleister."
+      },
+      {
+        "title": "Koordination",
+        "description": "Wir stimmen alle Beteiligten ab und behalten jederzeit den Überblick - Sie lehnen sich zurück."
+      },
+      {
+        "title": "Umzugstag",
+        "description": "Wir begleiten Sie persönlich am grossen Tag und sorgen für einen pünktlichen, sicheren Ablauf."
+      },
+      {
+        "title": "Abschluss",
+        "description": "Wir begleiten Sie bis alles sitzt und stehen auch nach dem Umzug für Fragen zur Verfügung."
+      }
+    ],
+    "bar_title": "Kostenloses Erstgespräch",
+    "bar_subtitle": "Jetzt unverbindlich anfragen - wir melden uns innerhalb von 24 Stunden."
+  },
+  "whoweare": {
+    "image_src": "images/team.jpg",
+    "image_alt": "ReloPlan Team",
+    "title_plain": "Wer",
+    "title_gradient": "wir sind",
+    "paragraphs": [
+      "ReloPlan ist ein motiviertes und kompetentes Team aus drei Spezialisten mit über 30 Jahren Erfahrung, das im Februar 2026 den Startschuss für die eigene Firma gegeben hat. Mit frischen Ideen und viel Leidenschaft vereinen wir Qualität und Verlässlichkeit, um auch komplexe Umzugsprojekte strukturiert und vorausschauend zu begleiten.",
+      "Dieser Schritt ist für uns mehr als nur eine Firmengründung - es ist der Beginn einer Reise, auf der wir unsere Expertise bündeln, um dich professionell, zuverlässig und partnerschaftlich zu begleiten.",
+      "Was uns auszeichnet, ist unser eingespieltes Miteinander: Wir arbeiten Hand in Hand, denken lösungsorientiert und steuern Prozesse effizient, präzise und mit Blick fürs Detail. Unsere Arbeit ist geprägt von Vertrauen, Offenheit und dem Fokus, für Unternehmen und Institutionen reibungslose Abläufe zu schaffen."
+    ],
+    "cta": "Lass uns gemeinsam starten."
+  },
+  "team": {
+    "label": "Das Team",
+    "title_plain": "Das",
+    "title_gradient": "Team",
+    "members": [
+      {
+        "name": "Roger Schwendener",
+        "role": "Miteigentümer, Geschäftsführer",
+        "description": "Roger verfügt über 15 Jahre Erfahrung im Bereich der Umzugsplanung und ist seit 2010 als Projektleiter tätig. Dank seiner langjährigen Praxis bringt er auch bei komplexen Projekten ein hohes Mass an Struktur, Ruhe und Verlässlichkeit ein. Zu seinen persönlichen Referenzen zählen unter anderem die Universität Bern, das Seespital Horgen, das Bundesamt für Bauten und Logistik sowie Stadtwerk Winterthur.",
+        "email": "roger.schwendener@reloplan.ch",
+        "image": "images/roger-schwendener.jpg",
+        "image_alt": "Portrait von Roger Schwendener",
+        "references": [
+          "Universität Bern",
+          "Seespital Horgen",
+          "Bundesamt für Bauten und Logistik",
+          "Stadtwerk Winterthur"
+        ]
+      },
+      {
+        "name": "Daniel Schmidt",
+        "role": "Miteigentümer, Geschäftsführer",
+        "description": "Daniel verfügt über zehn Jahre Erfahrung im Bereich der Umzugsplanung und ist seit 2018 als Projektleiter tätig. Besonders schätzt er anspruchsvolle Projekte und fühlt sich auch in hektischen Phasen wohl, in denen Übersicht, Struktur und Entscheidungsfreude gefragt sind. Zu seinen persönlichen Referenzen zählen unter anderem das Kinderspital Zürich, das Inselspital Bern, das Polizei- und Justizzentrum Zürich sowie die Universität Zürich.",
+        "email": "daniel.schmidt@reloplan.ch",
+        "image": "images/daniel-schmidt.jpg",
+        "image_alt": "Portrait von Daniel Schmidt",
+        "references": [
+          "Kinderspital Zürich",
+          "Inselspital Bern",
+          "Polizei- und Justizzentrum Zürich",
+          "Universität Zürich"
+        ]
+      },
+      {
+        "name": "Marco Buser",
+        "role": "Projektleiter",
+        "description": "Marco steuert mit fundierter Erfahrung in der Umzugsplanung Projekte strukturiert und mit hohem Qualitätsanspruch. Seit 2025 bringt er sich als Projektleiter proaktiv ein und schätzt es, Verantwortung zu übernehmen. Komplexen Herausforderungen begegnet er lösungsorientiert und überzeugt durch seine engagierte Arbeitsweise sowie die Motivation zur stetigen Weiterentwicklung. Zu seinen Referenzen zählen Roche und Endress & Hauser.",
+        "email": "marco.buser@reloplan.ch",
+        "image": "images/marco-buser.jpg",
+        "image_alt": "Portrait von Marco Buser",
+        "references": [
+          "Roche",
+          "Endress & Hauser"
+        ]
+      }
+    ],
+    "title_suffix": ""
+  },
+  "contact": {
+    "title_plain": "Nehmen Sie",
+    "title_gradient": "Kontakt auf",
+    "intro": "",
+    "email": "info@reloplan.ch",
+    "phone_display": "+41 44 777 29 29",
+    "phone_href": "+41447772929",
+    "address": "Im Hanfland 7, 8902 Urdorf, Schweiz",
+    "linkedin": "reloplan-ag",
+    "map_src": "https://maps.google.com/maps?q=Im%20Hanfland%207%2C%208902%20Urdorf%2C%20Schweiz&output=embed"
+  },
+  "testimonials": {
+    "label": "Rezensionen",
+    "title_plain": "Was unsere Kunden",
+    "title_gradient": "sagen",
+    "items": []
+  },
+  "faq": {
+    "label": "FAQ",
+    "title_plain": "Noch Fragen?",
+    "title_gradient": "wir haben Antworten",
+    "items": []
+  },
+  "cta": {
+    "title": "Bereit für Ihren Umzug?",
+    "text": "Kontaktieren Sie uns für ein kostenloses Erstgespräch.",
+    "btn_text": "Jetzt anfragen",
+    "btn_href": "#contact"
+  },
+  "features": {
+    "label": "Unsere Leistungen",
+    "title_plain": "Was wir",
+    "title_gradient": "bieten",
+    "items": []
+  },
+  "_infoVersion": "reloplan-ch-2026-05-02"
 };
 
 function json(body, status = 200, extraHeaders = {}) {
@@ -174,12 +356,34 @@ function fillMissingContent(value, fallback) {
   return { value, changed: false };
 }
 
+function applyCurrentFactualContent(content) {
+  if (content._infoVersion === DEFAULT_CONTENT._infoVersion) return false;
+
+  content.meta = { ...(content.meta || {}), ...DEFAULT_CONTENT.meta };
+  content.hero = { ...(content.hero || {}), subtitle: DEFAULT_CONTENT.hero.subtitle };
+  content.about = clone(DEFAULT_CONTENT.about);
+  content.whoweare = clone(DEFAULT_CONTENT.whoweare);
+  content.team = clone(DEFAULT_CONTENT.team);
+  content.contact = { ...(content.contact || {}), ...DEFAULT_CONTENT.contact };
+  content.footer = { ...(content.footer || {}), copyright: DEFAULT_CONTENT.footer.copyright };
+
+  if (content.nav && Array.isArray(content.nav.links)) {
+    content.nav.links = content.nav.links.map((link) =>
+      link && link.href === '#about' ? { ...link, label: 'Umzugsmanagement' } : link
+    );
+  }
+
+  content._infoVersion = DEFAULT_CONTENT._infoVersion;
+  return true;
+}
+
 function migrateContent(content) {
   let changed = false;
   if (!content || typeof content !== 'object' || Array.isArray(content)) {
     content = clone(DEFAULT_CONTENT);
     changed = true;
   }
+  changed = applyCurrentFactualContent(content) || changed;
   const filled = fillMissingContent(content, DEFAULT_CONTENT);
   content = filled.value;
   changed = changed || filled.changed;
